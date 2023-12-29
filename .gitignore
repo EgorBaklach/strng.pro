@@ -1,3 +1,10 @@
-/vendor
-/logs
+node_modules
+vendor
+config
+fonts
+favicon
+images
+logs
 .idea
+*.local
+*.old

@@ -1,0 +1,35 @@
+{
+  "name": "egorbaklach/microbe",
+  "type": "project",
+  "description": "Microbe",
+  "license": "MIT",
+  "require": {
+    "php": "^7.3.0",
+    "egorbaklach/contracts": "1.4",
+    "egorbaklach/molecule": "2.0",
+    "laminas/laminas-config-aggregator": "1.4.0",
+    "laminas/laminas-diactoros": "2.5.0",
+    "laminas/laminas-httphandlerrunner": "1.3.0",
+    "league/container": "4.2.0",
+    "league/event": "2.2.0",
+    "league/plates": "3.3.0",
+    "league/route": "5.0.0",
+    "phpfastcache/phpfastcache": "8.0.4",
+    "symfony/console": "5.2.5",
+    "ext-pdo": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/App",
+      "Cli\\": "src/Cli",
+      "Framework\\": "src/Framework",
+      "Magistrale\\": "src/Magistrale"
+    }
+  },
+  "config": {
+    "preferred-install": "dist",
+    "sort-packages": true,
+    "optimize-autoloader": true
+  },
+  "minimum-stability": "dev"
+}

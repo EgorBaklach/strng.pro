@@ -18,20 +18,20 @@ const _jsx = function (type, props, key)
 
 const _jsxs = function (type, props, key)
 {
-    const ref = useRef(null), [children, setChildren] = useState(props.children), [width] = useResize();
+    const ref = useRef(null), [children, setChildren] = useState(props.children), [width, height] = useResize();
 
-    useEffect(() => { if(this.props?.horizontal) Renderer.delay.call([children, setChildren, width]) }, [width, Renderer.delay.finish])
+    useEffect(() => { this.props?.horizontal ? Renderer.delay.call([children, setChildren, width, height]) : null }, [width, height, Renderer.delay.finish])
 
     return jsxs(type, {...props, children, ref: ['symbol', 'function'].includes(typeof type) ? null : ref}, key)
 }
 
 const handler = async (json, url) => ({...json, content: await evaluate(json.content, {jsx: _jsx, Fragment, jsxs: _jsxs.bind(json), development: false}), url})
 
-const NotFoundHandler = (Component) => () =>
+const ComponentHandler = (Component) => () =>
 {
     const Context = useOutletContext(), [width] = useResize(); useEffect(() => () => document.body.removeAttribute('class'), [Context.url])
 
-    useEffect(() => () => Context.props?.horizontal ? Renderer.reStart() : null, [width < 768, Context.url])
+    useEffect(() => () => Context.props?.horizontal ? Renderer.build() : null, [width < 768, Context.url])
 
     return createElement(Context.status > 400 ? Error : Component, {Context})
 };
@@ -43,13 +43,13 @@ export default [
         shouldRevalidate: (url) => url.currentUrl.pathname !== url.nextUrl.pathname,
         Component: () =>
         {
-            const Context = useLoaderData(); useEffect(() => document.querySelector("root").removeAttribute('data-ssr'), []); return <Outlet context={Context}/>;
+            const Context = useLoaderData(); useEffect(() => Renderer.build() && document.querySelector("root").removeAttribute('data-ssr'), []); return <Outlet context={Context}/>;
         },
         children: [
-            {index: true, Component: NotFoundHandler(Index)},
-            {path: 'blog/', Component: NotFoundHandler(Blog)},
-            {path: 'blog/:slug', Component: NotFoundHandler(Article)},
-            {path: '*', Component: NotFoundHandler(Error)}
+            {index: true, Component: ComponentHandler(Index)},
+            {path: 'blog/', Component: ComponentHandler(Blog)},
+            {path: 'blog/:slug', Component: ComponentHandler(Article)},
+            {path: '*', Component: ComponentHandler(Error)}
         ]
     }
 ]

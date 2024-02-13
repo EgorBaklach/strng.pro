@@ -1,6 +1,6 @@
 <?php namespace Framework;
 
-use Cli\Console\ConsoleInterface;
+use Contracts\Console\ConsoleInterface;
 use Contracts\Emitter\EmitterInterface;
 use League\Container\Container;
 use League\Container\Definition\DefinitionAggregateInterface;

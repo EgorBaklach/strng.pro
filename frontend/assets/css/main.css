@@ -64,7 +64,7 @@ aside{
         content: '';
         display: block;
         position: absolute;
-        width: calc(100vh - 3vw);
+        width: calc(calc(var(--vh, 1vh) * 100) - 3vw);
         top: 50%;
         left: 50%;
         height: calc(17vw);
@@ -342,7 +342,7 @@ aside{
         content: '';
         display: none;
         position: fixed;
-        width: calc(100vh - 30px);
+        width: calc(calc(var(--vh, 1vh) * 100) - 30px);
         top: 50%;
         left: 50%;
         height: calc(100vw - 30px);
@@ -725,20 +725,20 @@ aside{
             display: inline-block;
             position: relative;
             white-space: normal;
-            padding: 1.5vw 5vw 1.5vw 0;
+            padding: 1.5vw 4vw 1.5vw 0;
             width: 58.5vw;
-            height: 100vh;
+            height: calc(var(--vh, 1vh) * 100);
         }
         .columnizer-active .article-wrapper .column:before{
             content: '';
             display: block;
             position: absolute;
-            height: calc(100vh - 3vw);
+            height: calc(calc(var(--vh, 1vh) * 100) - 3vw);
             background: #4B4F52;
             width: 1px;
             top: 1.5vw;
             bottom: 1.5vw;
-            left: -2.5vw;
+            left: -2vw;
         }
         .columnizer-active .article-wrapper .column:after{
             font-family: Geometria, Tahoma, Arial, serif;

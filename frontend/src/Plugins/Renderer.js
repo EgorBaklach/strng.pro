@@ -5,39 +5,48 @@ export default new class
 {
     constructor()
     {
-        this.delay = new Delayer(this.handle.bind(this), 50); this.first = []; this.last = []; this.children = [];
+        this.delay = new Delayer(this.columnize.bind(this), 150); this.first = []; this.last = []; this.children = [];
     }
 
-    handle([children, setChildren, width])
+    build()
+    {
+        document.documentElement.style.setProperty('--vh', window.innerHeight * 0.01 + 'px');
+
+        document.body.classList.remove('columnizer-active', 'is-scroll');
+
+        this.delay.finish = false;
+        this.sum_dem = 0;
+
+        return true;
+    }
+
+    columnize([children, setChildren, width, height])
     {
         if(this.delay.finish === false) return setChildren(this.children = [...this.first, ...children, ...this.last]);
 
-        document.body.classList.remove('columnizer-active'); if(width >= 768) this.columnize(setChildren); return null;
-    }
-
-    columnize(setChildren)
-    {
-        let step = 0, different = 0, list = [[]];
-
-        this.children.every((child) =>
+        if(width >= 768 && this.sum_dem !== width + height)
         {
-            if(!child.ref?.current) return true; const {y, bottom} = child.ref.current.getBoundingClientRect();
+            let step = 0, different = 0, list = [[]]; document.body.classList.remove('columnizer-active');
 
-            if((bottom + different + 30) > (window.innerHeight*(step+1)))
+            this.children.every((child) =>
             {
-                step++; if(list[step] === undefined) list[step] = []; different += window.innerHeight*step - y;
-            }
+                if(!child.ref?.current) return true; const {y, bottom} = child.ref.current.getBoundingClientRect();
 
-            list[step].push(child); return true;
-        });
+                if((bottom + different + 50) > (window.innerHeight*(step+1)))
+                {
+                    step++; if(list[step] === undefined) list[step] = []; different = window.innerHeight*step - y;
+                }
 
-        setChildren(list.map((children, index) => jsx('div', {children, className: 'column', page: index + 1 + ' стр.'})));
+                list[step].push(child); return true;
+            });
 
-        document.body.classList.add('columnizer-active')
-    }
+            setChildren(list.map((children, index) => jsx('div', {children, className: 'column', page: index + 1 + ' стр.'})));
 
-    reStart()
-    {
-        this.delay.finish = false; return true
+            document.documentElement.style.setProperty('--vh', window.innerHeight * 0.01 + 'px'); document.body.classList.add('columnizer-active');
+
+            document.querySelector('.wrapper').scrollLeft = 0;
+        }
+
+        return null;
     }
 }

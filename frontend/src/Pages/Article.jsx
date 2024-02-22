@@ -12,8 +12,8 @@ import Layout from "../Components/Layout.jsx";
 import Tags from "../Components/Tags.jsx";
 import Wrapper from "../Components/Wrapper.jsx";
 
-import Delayer from "../Plugins/Delayer.js";
-import Renderer from "../Plugins/Renderer.js";
+import Delayer from "../Plugins/Delayer.jsx";
+import Renderer from "../Plugins/Renderer.jsx";
 
 import {clean, close, insert, open} from "../Reducers/Pictures.jsx";
 
@@ -28,10 +28,10 @@ const Video = (props) => <YouTube {...props} ref={useRef(null)}/>
 
 const GridGalleryItem = function({src, title, iteration, insert})
 {
-    useEffect(() => { insert({src}) }, []); return <a href={src} className="image js-gallery-image"><img src={src} alt={title + ' - ' + iteration} /></a>
+    useEffect(() => {insert({src})}, []); return <a href={src} className="image js-gallery-image"><img src={src} alt={title + ' - ' + iteration} /></a>
 }
 
-const GridGallertItemConnected = connect(null, {insert: (slide) => (dispatch) => dispatch(insert(slide)), open: (index) => (dispatch) => dispatch(open(index))})(GridGalleryItem)
+const GridGallertItemConnected = connect(null, {insert: (slide) => (dispatch) => dispatch(insert(slide))})(GridGalleryItem)
 
 const GridGallery = ({pictures, title, images, clean}) =>
 {
@@ -55,7 +55,7 @@ const GridGalleryConnected = connect(null, {clean: () => (dispatch) => dispatch(
 
 const LigthboxComponent = ({list, index, close}) => list.length ? <Lightbox open={index >= 0} slides={list} close={close} index={index}/> : null
 
-const LightboxConnected = connect((state) => state.pictures, {close: () => (dispatch) => dispatch(close())})(LigthboxComponent)
+const LightboxConnected = connect(state => state.pictures, {close: () => (dispatch) => dispatch(close())})(LigthboxComponent)
 
 export default ({Context}) =>
 {
@@ -63,7 +63,7 @@ export default ({Context}) =>
 
     useEffect(() =>
     {
-        document.body.classList.add('article-page'); $(document).on('click', '.js-gallery-image', (e) => {e.preventDefault(); dispatch(open($(e.currentTarget).index()))})
+        $(document).on('click', '.js-gallery-image', e => dispatch(open($(e.currentTarget).index())) && false); document.body.classList.add('article-page');
     }, [Context.url])
 
     Renderer.first = [
@@ -83,9 +83,12 @@ export default ({Context}) =>
         <Tags article={Context} ref={useRef(null)} key="tags">{"© strng.pro " + new Date().getFullYear()}</Tags>
     ];
 
+    Renderer.lb = <button ref={useRef(null)} className="left" onClick={event => Renderer.turn(event, false)}></button>;
+    Renderer.rb = <button ref={useRef(null)} className="right active" onClick={event => Renderer.turn(event, true)}></button>;
+
     return <Layout articles={Context.articles}>
         <Wrapper component="main" role="main" className="wrapper">
-            <HorizontalWheel className="article-wrapper">
+            <HorizontalWheel className={"article-wrapper" + (Context.props?.horizontal ? " horizontal" : "")}>
                 {import.meta.env.SSR || !Context.props?.horizontal ? Renderer.first.map(value => value) : null}
                 <Content components={{code, Video, GridGallery: (props) => <GridGalleryConnected pictures={Context.pictures} title={Context.name} {...props}/>}}/>
                 {import.meta.env.SSR || !Context.props?.horizontal ? Renderer.last.map(value => value) : null}

@@ -150,6 +150,9 @@ aside{
                     vertical-align: middle;
                     color: white;
                 }
+                header .menu ul a.active{
+                    color: #8F9396;
+                }
                 header .menu > ul{
 
                 }
@@ -711,12 +714,19 @@ aside{
                 object-fit: cover;
             }
     .article-page .article-wrapper{
-        padding: 1.5vw 5vw 1.5vw 1.5vw;
+        padding: 1.5vw 4vw 1.5vw 1.5vw;
         width: 60vw;
+    }
+    .article-wrapper.horizontal{
+        height: calc(var(--vh, 1vh) * 100);
+        visibility: hidden;
+        opacity: 0;
     }
     .columnizer-active .article-wrapper{
         white-space: nowrap;
         text-align: justify;
+        visibility: visible;
+        opacity: 1;
         width: auto;
         padding: 0 1.5vw;
     }
@@ -727,13 +737,12 @@ aside{
             white-space: normal;
             padding: 1.5vw 4vw 1.5vw 0;
             width: 58.5vw;
-            height: calc(var(--vh, 1vh) * 100);
+            height: 100%;
         }
         .columnizer-active .article-wrapper .column:before{
             content: '';
             display: block;
             position: absolute;
-            height: calc(calc(var(--vh, 1vh) * 100) - 3vw);
             background: #4B4F52;
             width: 1px;
             top: 1.5vw;
@@ -757,6 +766,40 @@ aside{
         .columnizer-active .article-wrapper .column:first-child:before{
             display: none;
         }
+        .columnizer-active .article-wrapper > button{
+            display: none;
+            position: fixed;
+            cursor: pointer;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 2;
+            /*background-color: rgba(50,54,57,.7);*/
+            background-color: #323639;
+            height: 2.6vw;
+            width: 2.6vw;
+            border: none;
+            outline: none !important;
+        }
+        .columnizer-active .article-wrapper > button.active{
+            display: block;
+        }
+            .columnizer-active .article-wrapper > button:after{
+                font-family: "Awesome", serif;
+                font-weight: 900;
+                font-size: 1vw;
+            }
+        .columnizer-active .article-wrapper > button.left{
+            left: 21.5vw;
+        }
+            .columnizer-active .article-wrapper > button.left:after{
+                content: "\f060";
+            }
+        .columnizer-active .article-wrapper > button.right{
+            right: 1.5vw;
+        }
+            .columnizer-active .article-wrapper > button.right:after{
+                content: "\f061";
+            }
 
 /* ARTICLES */
 
@@ -1027,6 +1070,11 @@ aside{
         .article-page .article-wrapper{
             padding: 0 10vw 10vw;
             width: 100%;
+        }
+        .article-wrapper.horizontal{
+            height: auto;
+            visibility: visible;
+            opacity: 1;
         }
         .article-page .wrapper:before{
             display: none;

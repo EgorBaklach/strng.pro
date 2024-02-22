@@ -2,11 +2,7 @@ export default class
 {
     constructor(callback, ttl)
     {
-        this.callback = callback;
-        this.ttl = ttl;
-
-        this.finish = false;
-        this.interval = 0;
+        this.callback = callback; this.ttl = ttl; this.finish = false; this.interval = 0;
     }
 
     call(event)

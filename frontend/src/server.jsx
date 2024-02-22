@@ -1,9 +1,8 @@
-import ReactDOMServer from 'react-dom/server'
-import {createStaticHandler, createStaticRouter, StaticRouterProvider} from "react-router-dom/server.js"
+import {createStaticHandler, createStaticRouter, StaticRouterProvider} from "react-router-dom/server.js";
+import ReactDOMServer from 'react-dom/server';
+
+import ReduxProvider from "./provider.jsx";
 import routes from "./routes.jsx";
-import {configureStore} from "@reduxjs/toolkit";
-import pictures from "./Reducers/Pictures.jsx";
-import {Provider} from "react-redux";
 
 const createFetchRequest = (req) =>
 {
@@ -24,7 +23,7 @@ export const render = async (request) =>
     const { query, dataRoutes } = createStaticHandler(routes), context = await query(createFetchRequest(request)), router = createStaticRouter(dataRoutes, context);
 
     return {
-        html: ReactDOMServer.renderToString(<Provider store={configureStore({reducer: {pictures}})}><StaticRouterProvider router={router} context={context} hydrate={false} /></Provider>),
+        html: ReactDOMServer.renderToString(<ReduxProvider><StaticRouterProvider router={router} context={context} hydrate={false} /></ReduxProvider>),
         statusCode: context.loaderData[0].status
     };
 }

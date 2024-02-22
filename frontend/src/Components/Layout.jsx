@@ -1,4 +1,4 @@
-import {Link} from "react-router-dom"
+import {Link, NavLink} from "react-router-dom"
 import {Fragment} from "react"
 import Scrollbar from "./Scrollbar"
 
@@ -11,30 +11,28 @@ export default ({children, articles}) =>
                     <nav className="menu" role="navigation">
                         <ul>
                             <li>
-                                <Link to="/albums/">Фотографии</Link>
+                                <NavLink end to="/albums/">Фотографии</NavLink>
                                 <ul>
                                     {
-                                        Object.keys(articles)
-                                            .filter((id) => articles[id].props?.is_gallery)
-                                            .slice(0, 7).map((id, i) => <li key={id} className={i > 3 ? 'mobile-visible' : ''}><Link to={'/blog/' + articles[id].slug + '/'}>{articles[id].name}</Link></li>)
+                                        Object.keys(articles).filter((id) => articles[id].props?.is_gallery).slice(0, 7).map((id, i) =>
+                                            <li key={id} className={i > 3 ? 'mobile-visible' : ''}><NavLink to={'/blog/' + articles[id].slug + '/'}>{articles[id].name}</NavLink></li>)
                                     }
                                 </ul>
                             </li>
                             <li>
-                                <Link to="/blog/">Блог</Link>
+                                <NavLink end to="/blog/">Блог</NavLink>
                                 <ul>
                                     {
-                                        Object.keys(articles)
-                                        .filter((id) => !articles[id].props?.is_gallery)
-                                        .slice(0, 7).map((id, i) => <li key={id} className={i > 3 ? 'mobile-visible' : ''}><Link to={'/blog/' + articles[id].slug + '/'}>{articles[id].name}</Link></li>)
+                                        Object.keys(articles).filter((id) => !articles[id].props?.is_gallery).slice(0, 7).map((id, i) =>
+                                            <li key={id} className={i > 3 ? 'mobile-visible' : ''}><NavLink to={'/blog/' + articles[id].slug + '/'}>{articles[id].name}</NavLink></li>)
                                     }
                                 </ul>
                             </li>
                             <li>
-                                <Link to="/stock/">Склад</Link>
+                                <NavLink end to="/stock/">Склад</NavLink>
                             </li>
                             <li>
-                                <Link to="/about/">О проекте</Link>
+                                <NavLink end to="/about/">О проекте</NavLink>
                             </li>
                         </ul>
                     </nav>

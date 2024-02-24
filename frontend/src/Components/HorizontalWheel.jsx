@@ -1,12 +1,13 @@
-import useResize from "../Hooks/useResize"
+import {connect} from "react-redux";
+
 import Renderer from "../Plugins/Renderer.jsx";
 import Delayer from "../Plugins/Delayer.jsx";
 
-export default ({children, className}) =>
+export default connect(state => state.Mobiler)(({mobile, children, className}) =>
 {
-    const [width] = useResize(), delay = new Delayer(wrapper => Renderer.scroll(wrapper.scrollLeft), 150), move = (event) =>
+    const delay = new Delayer(wrapper => Renderer.scroll(wrapper.scrollLeft), 150), move = (event) =>
     {
-        if(width < 768) return; const container = event.currentTarget.parentNode, distance = container.scrollLeft;
+        if(mobile) return; const container = event.currentTarget.parentNode, distance = container.scrollLeft;
 
         if(event.type === 'wheel')
         {
@@ -19,4 +20,4 @@ export default ({children, className}) =>
     };
 
     return <div className={className} onWheel={move} onTouchMove={move}>{children}</div>
-};
+});

@@ -1,4 +1,5 @@
 import {Link} from "react-router-dom";
+
 import Layout from "../Components/Layout.jsx";
 import Wrapper from "../Components/Wrapper.jsx";
 import HorizontalWheel from "../Components/HorizontalWheel.jsx";
@@ -33,6 +34,7 @@ export default ({Context}) =>
         <Wrapper component="main" role="main" className="wrapper">
             <Link to="/" className="mobile-home-icon"></Link>
             <HorizontalWheel className="main-grid">
+                {Object.keys(Context.articles).slice(0, 11).map((id, iterator) => <MainGridBox iterator={iterator} article={Context.articles[id]} key={id}/>)}
                 {Object.keys(Context.articles).slice(0, 11).map((id, iterator) => <MainGridBox iterator={iterator} article={Context.articles[id]} key={id}/>)}
                 <div className="main-grid-box grid-box-copyrights">
                     <div className="grid-bow-wrapper">

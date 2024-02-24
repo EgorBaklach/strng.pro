@@ -5,8 +5,8 @@ export default class
         this.callback = callback; this.ttl = ttl; this.finish = false; this.interval = 0;
     }
 
-    call(event)
+    call(...params)
     {
-        if(this.finish) return; clearTimeout(this.interval); this.interval = setTimeout(() => this.finish = this.callback(event), this.ttl);
+        if(this.finish) return undefined; clearTimeout(this.interval); this.interval = setTimeout(() => this.finish = this.callback(...params), this.ttl);
     }
 }

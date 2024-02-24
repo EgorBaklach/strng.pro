@@ -23,6 +23,14 @@ class Articles
         [$match, $replace] = $matches; return self::months[$replace];
     }
 
+    public function gallery(): ?array
+    {
+        return array_filter($this->all(), function($article)
+        {
+            return $article['props']['is_gallery'];
+        });
+    }
+
     public function article(string $slug): ?array
     {
         return $this->all()[md5($slug)];

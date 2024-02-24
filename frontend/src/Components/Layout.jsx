@@ -1,17 +1,21 @@
 import {Link, NavLink} from "react-router-dom"
-import {Fragment} from "react"
-import Scrollbar from "./Scrollbar"
+import {createElement, Fragment} from "react"
+import {connect} from "react-redux";
+
+import Scrollbar from "./Scrollbar";
+
+const ScrollbarConnect = connect(state => state.Mobiler)(({mobile, children, component}) => createElement(!mobile ? Scrollbar : component, {component}, children));
 
 export default ({children, articles}) =>
     <Fragment>
         <aside key="complementary" role="complementary" className="header">
-            <Scrollbar component="header">
+            <ScrollbarConnect component="header" type="header">
                 <section className="header-fields">
                     <Link to="/" className="logo"></Link>
                     <nav className="menu" role="navigation">
                         <ul>
                             <li>
-                                <NavLink end to="/albums/">Фотографии</NavLink>
+                                <NavLink end to="/gallery/">Фотографии</NavLink>
                                 <ul>
                                     {
                                         Object.keys(articles).filter((id) => articles[id].props?.is_gallery).slice(0, 7).map((id, i) =>
@@ -45,7 +49,7 @@ export default ({children, articles}) =>
                         </ul>
                     </div>
                 </section>
-            </Scrollbar>
+            </ScrollbarConnect>
             <div className="header-mobile-hamburger" onClick={() => document.body.classList.toggle('header-mobile-open')}><span/></div>
         </aside>
         {children}

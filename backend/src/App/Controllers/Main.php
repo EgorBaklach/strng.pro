@@ -12,4 +12,9 @@ class Main extends ControllerAbstract
 
         return $article + $params + compact('page_title', 'og_title', 'og_description', 'description');
     }
+
+    public function useGallery(array $params): array
+    {
+        return $params + ['gallery' => $this->articles->gallery()];
+    }
 }

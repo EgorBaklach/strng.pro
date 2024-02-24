@@ -1,13 +1,19 @@
-import Delayer from "./Delayer"
 import {jsx} from "react/jsx-runtime";
 import AnimatedScroll from 'animated-scroll';
+
+import Delayer from "./Delayer"
+import {update} from "../Reducers/Mobiler.jsx";
 
 export default new class
 {
     constructor()
     {
-        this.onScrollize = new Delayer(() => Object.entries(this.scrollers).map(([k, ref]) => (() => true)(ref._ps.update()) && ref._container.classList.add('scroll-active')) && false, 150);
+        this.onScrollize = new Delayer(this.scrollize.bind(this), 50);
         this.onColumnize = new Delayer(this.columnize.bind(this), 50);
+        this.onResize = new Delayer(this.resize.bind(this), 50);
+
+        this.dimensions = 0;
+        this.setDimensions = sum => sum;
 
         this.scrollers = {};
         this.children = [];
@@ -20,14 +26,34 @@ export default new class
         this.async = false;
     }
 
-    build()
+    scrollize()
     {
-        document.body.classList.remove('columnizer-active', 'is-scroll'); this.vw = window.innerWidth * 0.01; this.onScrollize.call();
-
-        this.onColumnize.finish = this.init = false; this.container = this.as = null; this.pages = this.sum_dem = 0; this.scrollers = {};
+        document.body.classList.add('scroll-init'); Object.entries(this.scrollers).map(([k, ref]) => (() => true)(ref._ps.update()) && ref._container.classList.add('scroll-active')); return false
     }
 
-    listen()
+    destory()
+    {
+        document.body.removeAttribute('class'); this.container = this.as = null; this.sum_dem = this.width = this.pages = this.page = 0; this.scrollers = {};
+    }
+
+    build()
+    {
+        this.onColumnize.finish = this.init = false; setTimeout(() => this.onScrollize.call(), 150); return () => this.destory();
+    }
+
+    resize(dispatch)
+    {
+        document.documentElement.style.setProperty('--vh', window.innerHeight * 0.01 + 'px'); dispatch(update()); this.onScrollize.call(); this.setDimensions(window.innerWidth + window.innerHeight);
+    }
+
+    start(dispatch)
+    {
+        document.querySelector("root").removeAttribute('data-ssr'); window.addEventListener('resize', () => this.onResize.call(dispatch));
+
+        document.documentElement.style.setProperty('--vh', window.innerHeight * 0.01 + 'px');
+    }
+
+    continue()
     {
         this.container.scrollLeft > 0 ? this.lb.ref.current.classList.add('active') : this.lb.ref.current.classList.remove('active')
 
@@ -38,23 +64,23 @@ export default new class
 
     scroll(distance)
     {
-        this.page = Math.max(0, Math.floor((distance + (this.vw * 11.125))/ (this.vw * 58.5))); this.listen();
+        this.page = Math.max(0, Math.floor((distance + (this.vw * 11.125))/ (this.vw * 58.5))); this.continue();
     }
 
     turn(event, check)
     {
         if(this.async || this.pages < 0) return; this.async = true; check ? this.page++ : this.container.scrollLeft <= Math.max(0, this.vw * (58.5 * this.page - 11.125)) && this.page--;
 
-        this.as.left(Math.max(0, this.vw * (58.5 * this.page - 11.125))).then(() => this.listen());
+        this.as?.left(Math.max(0, this.vw * (58.5 * this.page - 11.125))).then(() => this.continue());
     }
 
-    columnize([children, setChildren, width, height])
+    columnize(children, setChildren)
     {
         if(this.onColumnize.finish === false) return setChildren(this.children = [...this.first, ...children, ...this.last]);
 
-        if(width >= 768 && this.sum_dem !== width + height)
+        if(window.innerWidth >= 768 && this.sum_dem !== this.dimensions)
         {
-            let different = 0, list = [[]]; this.sum_dem = width + height; this.width = this.page = this.pages = 0; document.body.classList.remove('columnizer-active');
+            let different = 0, list = [[]]; this.sum_dem = this.dimensions; this.width = this.page = this.pages = 0; document.body.classList.remove('columnizer-active');
 
             this.children.every((child) =>
             {
@@ -79,7 +105,7 @@ export default new class
 
             this.vw = window.innerWidth * 0.01; this.width = Math.max(0, Math.floor(this.vw * (58.5 * this.pages-- - 20)));
 
-            this.container = this.scrollers.main._container; this.as = new AnimatedScroll(this.container); this.container.scrollLeft = 0;
+            this.scrollers?.main && (this.container = this.scrollers.main._container) && (this.as = new AnimatedScroll(this.container)) && (this.container.scrollLeft = 0);
 
             this.onScrollize.call(); this.init = true;
         }

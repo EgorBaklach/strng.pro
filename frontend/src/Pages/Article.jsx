@@ -15,7 +15,7 @@ import Wrapper from "../Components/Wrapper.jsx";
 import Delayer from "../Plugins/Delayer.jsx";
 import Renderer from "../Plugins/Renderer.jsx";
 
-import {clean, close, insert, open} from "../Reducers/Pictures.jsx";
+import {clean, close, insert, open} from "../Reducers/Imager.jsx";
 
 const code = ({className, ...props}) =>
 {
@@ -35,7 +35,7 @@ const GridGallertItemConnected = connect(null, {insert: (slide) => (dispatch) =>
 
 const GridGallery = ({pictures, title, images, clean}) =>
 {
-    const ref = useRef(null), onRender = new Delayer(() => ref.current?._containerRef.current.classList.add('complite'), 150);
+    const ref = useRef(null), onRender = new Delayer(() => (() => true)(Renderer.onScrollize.call()) && ref.current?._containerRef.current.classList.add('complite'), 150);
 
     useEffect(() => clean, [])
 
@@ -55,16 +55,15 @@ const GridGalleryConnected = connect(null, {clean: () => (dispatch) => dispatch(
 
 const LigthboxComponent = ({list, index, close}) => list.length ? <Lightbox open={index >= 0} slides={list} close={close} index={index}/> : null
 
-const LightboxConnected = connect(state => state.pictures, {close: () => (dispatch) => dispatch(close())})(LigthboxComponent)
+const LightboxConnected = connect(state => state.Imager, {close: () => (dispatch) => dispatch(close())})(LigthboxComponent)
 
-export default ({Context}) =>
+export default connect(state => state.Mobiler)(({mobile, Context}) =>
 {
     const dispatch = useDispatch(), Content = Context.content.default, pic = useRef(null);
 
-    useEffect(() =>
-    {
-        $(document).on('click', '.js-gallery-image', e => dispatch(open($(e.currentTarget).index())) && false); document.body.classList.add('article-page');
-    }, [Context.url])
+    useEffect(() => (() => undefined)($(document).on('click', '.js-gallery-image', e => dispatch(open($(e.currentTarget).index())) && false)), []);
+
+    useEffect(() => document.body.classList.add('article-page'), [mobile, Context.url]);
 
     Renderer.first = [
         <Link to="/" className="mobile-home-icon" key="home-icon"></Link>,
@@ -94,6 +93,6 @@ export default ({Context}) =>
                 {import.meta.env.SSR || !Context.props?.horizontal ? Renderer.last.map(value => value) : null}
             </HorizontalWheel>
         </Wrapper>
-        <LightboxConnected/>
+        <LightboxConnected type="lightbox"/>
     </Layout>;
-}
+})

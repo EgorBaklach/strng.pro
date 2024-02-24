@@ -1,7 +1,7 @@
 import {createSlice} from "@reduxjs/toolkit"
 
-export const Pictures = createSlice({
-    name: 'Pictures',
+export const Imager = createSlice({
+    name: 'Imager',
     initialState: {
         list: [],
         index: -1
@@ -26,6 +26,6 @@ export const Pictures = createSlice({
     },
 })
 
-export const { insert, open, close, clean } = Pictures.actions
+export const { insert, open, close, clean } = Imager.actions
 
-export default Pictures.reducer
+export default Imager.reducer

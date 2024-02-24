@@ -1,5 +1,7 @@
 import {Link} from "react-router-dom"
+import {connect} from "react-redux";
 import {useEffect} from "react"
+
 import Tags from "../Components/Tags"
 import Wrapper from "../Components/Wrapper"
 import Layout from "../Components/Layout";
@@ -15,9 +17,9 @@ const ArticleItem = ({article}) =>
     </div>
 }
 
-export default ({Context}) =>
+export default connect(state => state.Mobiler)(({mobile, Context}) =>
 {
-    useEffect(() => {document.body.classList.add('article-page')}, [])
+    useEffect(() => document.body.classList.add('article-page'), [mobile])
 
     return <Layout articles={Context.articles}>
         <Wrapper component="main" role="main" className="wrapper">
@@ -35,4 +37,4 @@ export default ({Context}) =>
             </div>
         </Wrapper>
     </Layout>
-}
+})

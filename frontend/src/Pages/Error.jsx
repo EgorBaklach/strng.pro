@@ -11,7 +11,7 @@ export default connect(state => state.Mobiler)(({mobile, Context}) =>
 
     return <Layout articles={Context.articles}>
         <Wrapper component="main" role="main" className="wrapper">
-            <div className="article-wrapper">
+            <div className="container">
                 <Link to="/" className="mobile-home-icon"></Link>
                 <div className="breadcrumbs">
                     <ul>

@@ -8,11 +8,21 @@ import Layout from "../Components/Layout";
 
 const ArticleItem = ({article}) =>
 {
-    return <div className="article-item">
-        <h2 className="article-item-name"><Link to={'/blog/' + article.slug + '/'}>{article.name}</Link></h2>
-        <div className="article-item-preview">{article.announce}</div>
+    return <div className="article-item box">
+        <h2 className="name"><Link to={'/blog/' + article.slug + '/'}>{article.name}</Link></h2>
+        <Link to={'/blog/' + article.slug + '/'} className="picture">
+            <img src={article.pictures[1]} alt={article.name}/>
+            <div className="social">
+                <ul>
+                    <li className="likes">{article.cnt_likes}</li>
+                    <li className="views">{article.cnt_views}</li>
+                    <li className="comments">{article.cnt_comments}</li>
+                </ul>
+            </div>
+        </Link>
+        <div className="preview">{article.announce}</div>
         <Tags article={article}>
-            <Link to={'/blog/' + article.slug + '/'} className="article-item-link article-item-detail">Подробнее...</Link>
+            <Link to={'/blog/' + article.slug + '/'} className="link detail">Подробнее...</Link>
         </Tags>
     </div>
 }
@@ -23,7 +33,7 @@ export default connect(state => state.Mobiler)(({mobile, Context}) =>
 
     return <Layout articles={Context.articles}>
         <Wrapper component="main" role="main" className="wrapper">
-            <div className="article-wrapper">
+            <div className="container">
                 <Link to="/" className="mobile-home-icon"></Link>
                 <div className="breadcrumbs">
                     <ul>

@@ -15,7 +15,7 @@ export default ({children, articles}) =>
                     <nav className="menu" role="navigation">
                         <ul>
                             <li>
-                                <NavLink end to="/gallery/">Фотографии</NavLink>
+                                <Link to="/gallery/">Фотографии</Link>
                                 <ul>
                                     {
                                         Object.keys(articles).filter((id) => articles[id].props?.is_gallery).slice(0, 7).map((id, i) =>
@@ -24,7 +24,7 @@ export default ({children, articles}) =>
                                 </ul>
                             </li>
                             <li>
-                                <NavLink end to="/blog/">Блог</NavLink>
+                                <Link to="/blog/">Блог</Link>
                                 <ul>
                                     {
                                         Object.keys(articles).filter((id) => !articles[id].props?.is_gallery).slice(0, 7).map((id, i) =>
@@ -33,10 +33,10 @@ export default ({children, articles}) =>
                                 </ul>
                             </li>
                             <li>
-                                <NavLink end to="/stock/">Склад</NavLink>
+                                <Link to="/stock/">Склад</Link>
                             </li>
                             <li>
-                                <NavLink end to="/about/">О проекте</NavLink>
+                                <Link to="/about/">О проекте</Link>
                             </li>
                         </ul>
                     </nav>

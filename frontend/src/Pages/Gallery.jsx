@@ -1,47 +1,53 @@
 import {Link} from "react-router-dom";
-import {useEffect} from "react"
+import {useEffect, useState} from "react";
 
-//import Tags from "../Components/Tags.jsx";
 import Layout from "../Components/Layout"
 import Wrapper from "../Components/Wrapper.jsx";
 import Slider from "../Components/Slider";
+import {connect} from "react-redux";
+import Delayer from "../Plugins/Delayer.jsx";
 
-/*const AlbumItem = ({article}) =>
+const Album = ({skip, setSkip, album}) =>
 {
-    return <div className="article-item">
-        <h2 className="article-item-name"><Link to={'/blog/' + article.slug + '/'}>{article.name}</Link></h2>
-        <div className="article-item-preview">{article.announce}</div>
-        <Tags article={article}>
-            <Link to={'/blog/' + article.slug + '/'} className="article-item-link article-item-detail">Подробнее...</Link>
-        </Tags>
-    </div>
-}*/
+    const delay = new Delayer(() => setSkip(false), 50);
 
-export default ({Context}) =>
+    const events = {
+        onDragStart: e => e.preventDefault(),
+        onClick: e => skip ? e.preventDefault() : true,
+        onMouseUp: () => delay.call(),
+        onTouchEnd: () => delay.call()
+    };
+
+    return <Link to={"/blog/" + album.slug + '/'} className="box large" {...events}>
+        <img src={album.pictures[1]} alt={album.name}/>
+        <div className="wrapper">
+            <div className="date">{album.date}</div>
+            <div className="title">{album.name}</div>
+            <div className="social">
+                <ul>
+                    <li className="likes">{album.cnt_likes}</li>
+                    <li className="views">{album.cnt_views}</li>
+                    <li className="comments">{album.cnt_comments}</li>
+                </ul>
+            </div>
+        </div>
+    </Link>;
+}
+
+export default connect(state => state.Mobiler)(({mobile, Context}) =>
 {
+    const [skip, setSkip] = useState(false); useEffect(() => document.body.classList.add('gallery'), [mobile, Context.url]);
+
     return <Layout articles={Context.articles}>
         <Wrapper component="main" role="main" className="wrapper">
             <Link to="/" className="mobile-home-icon"></Link>
-            {/*<Slider>
-                <div style={{ width: 100 }}>
-                    <p>100</p>
+            <h1 className="page-title show-mobile">Фотографии</h1>
+            <Slider setSkip={setSkip}>{Object.keys(Context.gallery).slice(0, 11).map((id) => <Album album={Context.gallery[id]} key={id} skip={skip} setSkip={setSkip}/>)}</Slider>
+            <div className="box copyrights">
+                <div className="wrapper">
+                    <div className="date">© strng.pro {new Date().getFullYear()}</div>
                 </div>
-                <div style={{ width: 200 }}>
-                    <p>200</p>
-                </div>
-                <div style={{ width: 75 }}>
-                    <p>75</p>
-                </div>
-                <div style={{ width: 300 }}>
-                    <p>300</p>
-                </div>
-                <div style={{ width: 225 }}>
-                    <p>225</p>
-                </div>
-                <div style={{ width: 175 }}>
-                    <p>175</p>
-                </div>
-            </Slider>*/}
+            </div>
         </Wrapper>
     </Layout>;
-}
+})

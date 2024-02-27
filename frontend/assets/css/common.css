@@ -45,7 +45,8 @@ a:hover{
     color: white;
 }
 
-.hidden{
+.hidden,
+.show-mobile{
     display: none;
 }
 
@@ -105,10 +106,12 @@ blockquote + *{
 }
 
 .page-title{
+    position: relative;
     font-size: 2.5vw;
     padding: 1.1vh 0 4vh;
     font-weight: 500;
     text-align: left;
+    z-index: 1;
 }
 
 small{
@@ -131,6 +134,11 @@ iframe{
         text-align: center;
         font-size: 8vw;
         line-height: 130%;
+        padding-top: 0;
+    }
+
+    .show-mobile{
+        display: block;
     }
 }
 
@@ -205,7 +213,6 @@ iframe{
 .justified-gallery{
     width: 100%;
     visibility: hidden;
-
 }
     .justified-gallery + *{
         padding-top: 2.5vh;
@@ -553,13 +560,13 @@ iframe{
 
 /* SLIDER */
 
-.slick-list, .slick-slider, .slick-track {
+.slick-track{
+    height: calc(calc(var(--vh, 1vh) * 100) - 3vw);
+}
+.slick-list, .slick-slider, .slick-track{
+    white-space: nowrap;
     position: relative;
     display: block
-}
-
-.slick-loading .slick-slide, .slick-loading .slick-track {
-    visibility: hidden
 }
 
 .slick-slider {
@@ -572,7 +579,14 @@ iframe{
     -khtml-user-select: none;
     -ms-touch-action: pan-y;
     touch-action: pan-y;
-    -webkit-tap-highlight-color: transparent
+    -webkit-tap-highlight-color: transparent;
+    visibility: hidden;
+    opacity: 0;
+}
+
+.slider-init .slick-slider{
+    visibility: visible;
+    opacity: 1;
 }
 
 .slick-list {
@@ -603,24 +617,8 @@ iframe{
     left: 0
 }
 
-.slick-track:after, .slick-track:before {
-    display: table;
-    content: ''
-}
-
-.slick-track:after {
-    clear: both
-}
-
 .slick-slide {
     display: none;
-    float: left;
-    height: 100%;
-    min-height: 1px
-}
-
-[dir=rtl] .slick-slide {
-    float: right
 }
 
 .slick-slide img {
@@ -636,13 +634,7 @@ iframe{
 }
 
 .slick-initialized .slick-slide {
-    display: block
-}
-
-.slick-vertical .slick-slide {
-    display: block;
-    height: auto;
-    border: 1px solid transparent
+    display: inline-block
 }
 
 .slick-arrow.slick-hidden {

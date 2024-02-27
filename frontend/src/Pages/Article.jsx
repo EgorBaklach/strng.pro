@@ -82,12 +82,12 @@ export default connect(state => state.Mobiler)(({mobile, Context}) =>
         <Tags article={Context} ref={useRef(null)} key="tags">{"© strng.pro " + new Date().getFullYear()}</Tags>
     ];
 
-    Renderer.lb = <button ref={useRef(null)} className="left" onClick={event => Renderer.turn(event, false)}></button>;
-    Renderer.rb = <button ref={useRef(null)} className="right active" onClick={event => Renderer.turn(event, true)}></button>;
+    Renderer.lb = <button ref={useRef(null)} className="arrow left" onClick={event => Renderer.turn(event, false)}></button>;
+    Renderer.rb = <button ref={useRef(null)} className="arrow right active" onClick={event => Renderer.turn(event, true)}></button>;
 
     return <Layout articles={Context.articles}>
         <Wrapper component="main" role="main" className="wrapper">
-            <HorizontalWheel className={"article-wrapper" + (Context.props?.horizontal ? " horizontal" : "")}>
+            <HorizontalWheel className={"container" + (Context.props?.horizontal ? " horizontal" : "")}>
                 {import.meta.env.SSR || !Context.props?.horizontal ? Renderer.first.map(value => value) : null}
                 <Content components={{code, Video, GridGallery: (props) => <GridGalleryConnected pictures={Context.pictures} title={Context.name} {...props}/>}}/>
                 {import.meta.env.SSR || !Context.props?.horizontal ? Renderer.last.map(value => value) : null}

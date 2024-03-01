@@ -19,7 +19,8 @@
 }
 
 html,
-body{
+body,
+button{
     font-family: Geometria, Tahoma, Arial, serif;
 }
 
@@ -109,6 +110,7 @@ blockquote + *{
     position: relative;
     font-size: 2.5vw;
     padding: 1.1vh 0 4vh;
+    margin: 0 10vw;
     font-weight: 500;
     text-align: left;
     z-index: 1;
@@ -139,6 +141,67 @@ iframe{
 
     .show-mobile{
         display: block;
+    }
+}
+
+/* LOADING */
+
+.loading-before:before,
+.loading-after:after{
+    content: '';
+    display: block;
+    border: 6px solid rgba(100, 100, 100, 0.4);
+    border-top: 6px solid rgba(50,54,57,1);
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+    height: 50px;
+    width: 50px;
+    -webkit-animation: rotate 0.8s infinite linear;
+    -o-animation: rotate 0.8s infinite linear;
+    animation: rotate 0.8s infinite linear;
+    background: transparent;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    margin-top: -25px;
+    margin-left: -25px;
+    z-index: 99999;
+}
+
+@-webkit-keyframes rotate{
+    from{
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    to{
+        -webkit-transform: rotate(359deg);
+        transform: rotate(359deg);
+    }
+}
+
+@-o-keyframes rotate{
+    from{
+        -webkit-transform: rotate(0deg);
+        -o-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    to{
+        -webkit-transform: rotate(359deg);
+        -o-transform: rotate(359deg);
+        transform: rotate(359deg);
+    }
+}
+
+@keyframes rotate{
+    from{
+        -webkit-transform: rotate(0deg);
+        -o-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    to{
+        -webkit-transform: rotate(359deg);
+        -o-transform: rotate(359deg);
+        transform: rotate(359deg);
     }
 }
 
@@ -213,14 +276,20 @@ iframe{
 .justified-gallery{
     width: 100%;
     visibility: hidden;
+    opacity: 0;
 }
     .justified-gallery + *{
         padding-top: 2.5vh;
     }
     .justified-gallery.complite{
         visibility: visible;
+        opacity: 1;
     }
     .justified-gallery .image{
+        box-shadow: 0 2px 7px rgba(0, 0, 0, .3);
+        border-radius: 10px;
+        overflow: hidden;
+        cursor: pointer;
         display: block;
     }
         .justified-gallery .image img{
@@ -584,7 +653,8 @@ iframe{
     opacity: 0;
 }
 
-.slider-init .slick-slider{
+.images-ready .slick-slider{
+    transition: opacity 250ms ease-out;
     visibility: visible;
     opacity: 1;
 }
@@ -622,7 +692,10 @@ iframe{
 }
 
 .slick-slide img {
-    display: block
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .slick-slide.slick-loading img {

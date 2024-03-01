@@ -11,6 +11,7 @@ import Blog from "./Pages/Blog.jsx";
 import Article from "./Pages/Article.jsx";
 import Error from './Pages/Error.jsx';
 import Gallery from "./Pages/Gallery.jsx";
+import Album from "./Pages/Album.jsx";
 
 const useResize = () => [Renderer.dimensions, Renderer.setDimensions] = useState(import.meta.env.SSR ? 0 : window.innerWidth + window.innerHeight);
 
@@ -47,7 +48,7 @@ export default [
         children: [
             {index: true, Component: ComponentConnected(() => Index)},
             {path: 'blog/', Component: ComponentConnected(() => Blog)},
-            {path: 'blog/:slug', Component: ComponentConnected(Context => Context.props?.is_gallery ? Error : Article)},
+            {path: 'blog/:slug', Component: ComponentConnected(Context => Context.props?.is_gallery ? Album : Article)},
             {path: 'gallery/', Component: ComponentConnected(() => Gallery)},
             {path: '*', Component: ComponentConnected(() => Error)}
         ]

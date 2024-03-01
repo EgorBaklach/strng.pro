@@ -2,7 +2,7 @@ import {Link, NavLink} from "react-router-dom"
 import {createElement, Fragment} from "react"
 import {connect} from "react-redux";
 
-import Scrollbar from "./Scrollbar";
+import Scrollbar from "./Scrollbar.jsx";
 
 const ScrollbarConnect = connect(state => state.Mobiler)(({mobile, children, component}) => createElement(!mobile ? Scrollbar : component, {component}, children));
 

@@ -1,8 +1,11 @@
 import {jsx} from "react/jsx-runtime";
 import AnimatedScroll from 'animated-scroll';
+import $ from "jquery";
 
-import Delayer from "./Delayer"
+import Delayer from "./Delayer.jsx"
+
 import {update} from "../Reducers/Mobiler.jsx";
+import {open} from "../Reducers/Imager.jsx";
 
 export default new class
 {
@@ -49,6 +52,8 @@ export default new class
     start(dispatch)
     {
         document.querySelector("root").removeAttribute('data-ssr'); window.addEventListener('resize', () => this.onResize.call(dispatch));
+
+        $(document).on('click', '.js-gallery-image', e => dispatch(open(e.currentTarget.getAttribute('data-index'))));
 
         document.documentElement.style.setProperty('--vh', window.innerHeight * 0.01 + 'px');
     }

@@ -1,11 +1,6 @@
-import {createElement, useEffect, useRef} from "react"
+import {createElement} from "react"
 import {connect} from "react-redux";
 
-import Scrollbar from "./Scrollbar"
+import Scrollbar from "./Scrollbar.jsx"
 
-export default connect(state => state.Mobiler)(({mobile, className, component, children, role}) =>
-{
-    const ref = useRef(null), scroll = (top) => top > 0 ? document.body.classList.add('is-scroll') : document.body.classList.remove('is-scroll'); useEffect(() => scroll(ref.current?.scrollTop || 0), []);
-
-    return createElement(!mobile ? Scrollbar : component, {component, className, role, ...(mobile ? {onScroll: event => scroll(event.currentTarget.scrollTop), ref} : {})}, children);
-});
+export default connect(state => state.Mobiler)(({mobile, className, component, reverse, children, role}) => createElement(!mobile ? Scrollbar : reverse ?? component, {className, role, ...(!mobile ? {component} : {})}, children));

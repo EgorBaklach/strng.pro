@@ -1,14 +1,15 @@
 import {connect} from "react-redux";
 import {createElement, Fragment, useEffect, useRef} from "react";
 import Slider from "react-slick";
+
 import Delayer from "../Plugins/Delayer.jsx";
+import Renderer from "../Plugins/Renderer.jsx";
 
 const SampleArrow = ({className, style, onClick}) => <button className={className} style={style} onClick={onClick}/>
 
-const Gallery = ({children, setSkip}) =>
+const Gallery = ({children, url, onLoaded}) =>
 {
     const ref = useRef(null),
-        onReInit = new Delayer(() => document.body.classList.add('slider-init'), 100),
         onWheel = new Delayer(delta => delta > 0 ? ref.current.slickPrev() : ref.current.slickNext(), 50),
         eventDispatch = (slider) =>
         {
@@ -17,10 +18,9 @@ const Gallery = ({children, setSkip}) =>
             return slider.removeEventListener("wheel", event => onWheel.call(Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail)))));
         };
 
-    useEffect(() => eventDispatch(ref.current.innerSlider.list.parentNode), []);
+    useEffect(() => eventDispatch(ref.current.innerSlider.list.parentNode), [url]);
 
     const settings = {
-        className: "slider variable-width",
         infinite: true,
         slidesToShow: 1,
         slidesToScroll: 1,
@@ -30,7 +30,7 @@ const Gallery = ({children, setSkip}) =>
         nextArrow: <SampleArrow/>
     };
 
-    return <Slider {...settings} swipeEvent={() => setSkip(true)} onReInit={() => onReInit.call()} ref={ref}>{children}</Slider>
+    return <Slider {...settings} swipeEvent={() => Renderer.async = true} onReInit={onLoaded} className="slider" ref={ref}>{children}</Slider>
 }
 
-export default connect(state => state.Mobiler)(props => !props.mobile ? <Gallery {...props}/> : createElement(props.component ?? Fragment, props, props.children))
+export default connect(state => state.Mobiler)(props => !props.mobile ? <Gallery {...props}/> : createElement(props.component ?? Fragment, props.component ? props : null, props.children))

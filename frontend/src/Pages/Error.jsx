@@ -2,15 +2,16 @@ import {Link} from "react-router-dom";
 import {connect} from "react-redux";
 import {useEffect} from "react";
 
-import Layout from "../Components/Layout";
+import Layout from "../Components/Layout.jsx";
 import Wrapper from "../Components/Wrapper.jsx";
+import Main from "../Components/Main.jsx";
 
 export default connect(state => state.Mobiler)(({mobile, Context}) =>
 {
     const Content = Context.content.default; useEffect(() => document.body.classList.add('article-page'), [mobile, Context.url])
 
     return <Layout articles={Context.articles}>
-        <Wrapper component="main" role="main" className="wrapper">
+        <Wrapper component="main" reverse={Main} role="main" className="wrapper">
             <div className="container">
                 <Link to="/" className="mobile-home-icon"></Link>
                 <div className="breadcrumbs">

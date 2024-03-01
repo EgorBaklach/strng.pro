@@ -2,9 +2,10 @@ import {Link} from "react-router-dom"
 import {connect} from "react-redux";
 import {useEffect} from "react"
 
-import Tags from "../Components/Tags"
-import Wrapper from "../Components/Wrapper"
-import Layout from "../Components/Layout";
+import Tags from "../Components/Tags.jsx"
+import Wrapper from "../Components/Wrapper.jsx"
+import Layout from "../Components/Layout.jsx";
+import Main from "../Components/Main.jsx";
 
 const ArticleItem = ({article}) =>
 {
@@ -21,8 +22,8 @@ const ArticleItem = ({article}) =>
             </div>
         </Link>
         <div className="preview">{article.announce}</div>
-        <Tags article={article}>
-            <Link to={'/blog/' + article.slug + '/'} className="link detail">Подробнее...</Link>
+        <Tags article={article} className="article-tags">
+            <li className="detail"><Link to={'/blog/' + article.slug + '/'}>Подробнее...</Link></li>
         </Tags>
     </div>
 }
@@ -32,7 +33,7 @@ export default connect(state => state.Mobiler)(({mobile, Context}) =>
     useEffect(() => document.body.classList.add('article-page'), [mobile])
 
     return <Layout articles={Context.articles}>
-        <Wrapper component="main" role="main" className="wrapper">
+        <Wrapper component="main" reverse={Main} role="main" className="wrapper">
             <div className="container">
                 <Link to="/" className="mobile-home-icon"></Link>
                 <div className="breadcrumbs">

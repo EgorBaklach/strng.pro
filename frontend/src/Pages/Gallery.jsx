@@ -1,25 +1,27 @@
 import {Link} from "react-router-dom";
-import {useEffect, useState} from "react";
-
-import Layout from "../Components/Layout"
-import Wrapper from "../Components/Wrapper.jsx";
-import Slider from "../Components/Slider";
+import {useEffect, useRef} from "react";
 import {connect} from "react-redux";
-import Delayer from "../Plugins/Delayer.jsx";
 
-const Album = ({skip, setSkip, album}) =>
+import Delayer from "../Plugins/Delayer.jsx";
+import Renderer from "../Plugins/Renderer.jsx";
+
+import Layout from "../Components/Layout.jsx"
+import Slider from "../Components/Slider.jsx";
+import Main from "../Components/Main.jsx";
+
+const Album = ({album, onLoaded}) =>
 {
-    const delay = new Delayer(() => setSkip(false), 50);
+    const delay = new Delayer(() => Renderer.async = false, 50);
 
     const events = {
         onDragStart: e => e.preventDefault(),
-        onClick: e => skip ? e.preventDefault() : true,
+        onClick: e => Renderer.async ? e.preventDefault() : true,
         onMouseUp: () => delay.call(),
         onTouchEnd: () => delay.call()
     };
 
     return <Link to={"/blog/" + album.slug + '/'} className="box large" {...events}>
-        <img src={album.pictures[1]} alt={album.name}/>
+        <img src={album.pictures[1]} alt={album.name} onLoad={() => onLoaded.call()}/>
         <div className="wrapper">
             <div className="date">{album.date}</div>
             <div className="title">{album.name}</div>
@@ -36,18 +38,22 @@ const Album = ({skip, setSkip, album}) =>
 
 export default connect(state => state.Mobiler)(({mobile, Context}) =>
 {
-    const [skip, setSkip] = useState(false); useEffect(() => document.body.classList.add('gallery'), [mobile, Context.url]);
+    const ref = useRef(null), onLoaded = new Delayer(() => {document.body.classList.add('images-ready'); !mobile && ref.current?.classList.remove('loading-after'); return true}, 250);
+
+    useEffect(() => {document.body.classList.add('gallery'); !mobile && ref.current?.classList.add('loading-after')}, [mobile, Context.url]);
 
     return <Layout articles={Context.articles}>
-        <Wrapper component="main" role="main" className="wrapper">
+        <Main role="main" className="wrapper" ref={ref}>
             <Link to="/" className="mobile-home-icon"></Link>
             <h1 className="page-title show-mobile">Фотографии</h1>
-            <Slider setSkip={setSkip}>{Object.keys(Context.gallery).slice(0, 11).map((id) => <Album album={Context.gallery[id]} key={id} skip={skip} setSkip={setSkip}/>)}</Slider>
+            <Slider url={Context.url} key="gallery" onLoaded={() => onLoaded.call()}>
+                {Object.keys(Context.gallery).slice(0, 11).map((id) => <Album album={Context.gallery[id]} key={'gallery-' + id} onLoaded={onLoaded}/>)}
+            </Slider>
             <div className="box copyrights">
                 <div className="wrapper">
                     <div className="date">© strng.pro {new Date().getFullYear()}</div>
                 </div>
             </div>
-        </Wrapper>
+        </Main>
     </Layout>;
 })

@@ -4,6 +4,7 @@ import {useEffect} from "react";
 import Layout from "../Components/Layout.jsx";
 import Wrapper from "../Components/Wrapper.jsx";
 import HorizontalWheel from "../Components/HorizontalWheel.jsx";
+import Main from "../Components/Main.jsx";
 
 const MainGridBox = ({iterator, article}) =>
 {
@@ -34,7 +35,7 @@ export default ({Context}) =>
     useEffect(() => document.body.classList.add('index'), []);
 
     return <Layout articles={Context.articles}>
-        <Wrapper component="main" role="main" className="wrapper">
+        <Wrapper component="main" reverse={Main} role="main" className="wrapper">
             <Link to="/" className="mobile-home-icon"></Link>
             <HorizontalWheel className="main-grid">
                 {Object.keys(Context.articles).slice(0, 11).map((id, iterator) => <MainGridBox iterator={iterator} article={Context.articles[id]} key={id}/>)}

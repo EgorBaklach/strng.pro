@@ -72,9 +72,9 @@ export default new class
         this.dispatch(reset());
     }
 
-    build()
+    build(context)
     {
-        if(this.scrollers.main?._container.scrollTop) this.scrollers.main._container.scrollTop = 0; return () => this.destroy();
+        if(this.scrollers.main?._container.scrollTop) this.scrollers.main._container.scrollTop = 0; this.context = context; return () => this.destroy();
     }
 
     /////////////////
@@ -196,9 +196,9 @@ export default new class
         return !Object.entries(state.list).filter(([k, v]) => !v).length ? this[state.action ?? 'after']() : false;
     }
 
-    render(childrens, setChildrens, context)
+    render(childrens, setChildrens)
     {
-        this.childrens = [...this.first, ...childrens, ...this.last]; this.setChildrens = setChildrens; this.context = context;
+        this.childrens = [...this.first, ...childrens, ...this.last]; this.setChildrens = setChildrens;
 
         if(this.first.length || this.last.length) setChildrens(this.childrens); this.dispatch(check()); return true;
     }

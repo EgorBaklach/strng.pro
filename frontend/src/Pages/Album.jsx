@@ -8,17 +8,19 @@ import {connect} from "react-redux";
 import Delayer from "../Plugins/Delayer.jsx";
 import Renderer from "../Plugins/Renderer.jsx";
 
+import Wrapper from "../Components/Wrapper.jsx";
 import Layout from "../Components/Layout.jsx";
 import Slider from "../Components/Slider.jsx";
 import Main from "../Components/Main.jsx";
 import Tags from "../Components/Tags.jsx";
 
-import {clean, close, insert} from "../Reducers/Imager.jsx";
-import Wrapper from "../Components/Wrapper";
+import {add as addImager, clean, close} from "../Reducers/Imager.jsx";
+import {add as addLoader, action, check, load} from "../Reducers/Loader.jsx";
 
-const LigthboxComponent = ({list, index, dispatch}) => list.length ? <Lightbox plugins={[Zoom]} render={{buttonZoom: () => null}} open={index >= 0} slides={list} close={() => dispatch(close())} index={index}/> : null
-
-const LightboxConnected = connect(state => state.Imager)(LigthboxComponent)
+const LightboxComponent = connect(state => state.Imager)(({list, index, dispatch}) =>
+{
+    const pictures = Object.values(list); return pictures.length ? <Lightbox plugins={[Zoom]} render={{buttonZoom: () => null}} open={index >= 0} slides={pictures} close={() => dispatch(close())} index={index}/> : null
+});
 
 const GridGallery = (props) =>
 {
@@ -38,15 +40,15 @@ const GridGallery = (props) =>
 
 export default connect(state => state.Mobiler)(({mobile, Context, dispatch}) =>
 {
-    const Content = Context.content.default, ref = useRef(null);
-
-    const onLoaded = new Delayer(() => {document.body.classList.add('images-ready'); !mobile && ref.current?.classList.remove('loading-after'); Renderer.onScrollize.call(); return true}, 250)
+    const Content = Context.content.default;
 
     const Picture = ({iteration, id}) =>
     {
-        useEffect(() => {dispatch(insert({src: Context.pictures[id]}))}, []);
+        useEffect(() => {dispatch(addLoader(Context.pictures[id])) && dispatch(addImager(Context.pictures[id]))}, []);
 
-        return <div className={"box image" + (mobile ? " js-gallery-image" : "")} data-index={iteration}><img src={Context.pictures[id]} alt={Context.name + ' - ' + iteration} onLoad={() => onLoaded.call()}/></div>;
+        return <div className={"box image" + (mobile ? " js-gallery-image" : "")} data-index={iteration}>
+            <img src={Context.pictures[id] + '?stamp=' + Math.floor(Date.now()/1000)} alt={Context.name + ' - ' + iteration} onLoad={() => dispatch(load(Context.pictures[id])) && dispatch(check())}/>
+        </div>;
     };
 
     const ShowDetail = ({className}) =>
@@ -60,28 +62,28 @@ export default connect(state => state.Mobiler)(({mobile, Context, dispatch}) =>
 
     const TagsContrainer = ({check, className}) => check && <Tags article={Context} ref={useRef(null)} key="tags" className={className}><li>{"© strng.pro " + new Date().getFullYear()}</li></Tags>;
 
-    useEffect(() => {document.body.classList.add('article-page', 'gallery'); !mobile && ref.current?.classList.add('loading-after'); return () => dispatch(clean()) && dispatch(close())}, [mobile, Context.url]);
+    useEffect(() => {dispatch(action('sliderInit')); document.body.classList.add(...['article-page', 'gallery', !mobile && 'loading-after'].filter(v => v)); return () => dispatch(clean()) && dispatch(close())}, [mobile, Context.url]);
 
     return <Layout articles={Context.articles}>
-        <Main role="main" className="wrapper" ref={ref}>
+        <Main role="main" className="wrapper" ref={useRef(null)}>
             <ShowDetail className="detail-btn"/><Link to="/" className="mobile-home-icon"></Link>
             <Wrapper component="div" className="detail">
                 <div className="breadcrumbs" ref={useRef(null)} key="breadcrumbs">
                     <ul>
                         <li><Link to="/" title="Главная">Главная</Link></li>
                         <li><Link to="/gallery/" title="Фотографии">Фотографии</Link></li>
-                        <li className="current"><span>{Context.name}</span></li>
+                        <li className="current"></li>
                     </ul>
                 </div>
                 <h1 className="page-title">{Context.name}</h1>
                 <Content/>
                 <TagsContrainer check={!mobile} className="article-tags"/>
             </Wrapper>
-            <Slider component={GridGallery} url={Context.url} key={'album-' + Context.id} onLoaded={() => onLoaded.call()}>
+            <Slider component={GridGallery} url={Context.url} key={'album-' + Context.id}>
                 {Object.keys(Context.pictures).map((id, iteration) => <Picture iteration={iteration} id={id} key={id}/>)}
             </Slider>
             <TagsContrainer check={mobile} className="article-tags tags-bottom"/>
         </Main>
-        <LightboxConnected type="lightbox"/>
+        <LightboxComponent type="lightbox"/>
     </Layout>;
 })

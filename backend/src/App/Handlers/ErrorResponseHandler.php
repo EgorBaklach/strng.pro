@@ -28,7 +28,7 @@ class ErrorResponseHandler implements ErrorHandlerInterface
     {
         $status = $error instanceof HttpExceptionInterface ? $error->getStatusCode() : $error->getCode();
 
-        $params = $this->statics->get(in_array($status, [404, 405]) ? $status : 500)->require() + ['articles' => $this->articles->all()];
+        $params = $this->statics->get(in_array($status, [404, 405]) ? $status : 500)->require() + $this->articles->articles();
 
         return new JsonResponse($params, $status);
     }

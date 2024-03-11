@@ -11,7 +11,7 @@ import ArticleItem from "../Components/ArticleItem.jsx";
 
 export default connect(state => state.Mobiler)(({mobile, Context}) =>
 {
-    useEffect(() => {document.body.classList.add('article-page');  Renderer.onScroll.call()}, [mobile])
+    useEffect(() => {document.body.classList.add('article-page'); Renderer.onScroll.call()}, [mobile, Context.tag.slug])
 
     return <Layout articles={Context.articles}>
         <Wrapper component="main" reverse={Main} role="main" className="wrapper">
@@ -20,11 +20,12 @@ export default connect(state => state.Mobiler)(({mobile, Context}) =>
                 <div className="breadcrumbs">
                     <ul>
                         <li><Link to="/" title="Главная">Главная</Link></li>
-                        <li className="current"><span>Блог</span></li>
+                        <li><Link to="/blog/" title="Блог">Блог</Link></li>
+                        <li className="current"><span>{Context.tag.name}</span></li>
                     </ul>
                 </div>
-                <h1 className="page-title">Блог</h1>
-                {Object.keys(Context.articles).map((id) => <ArticleItem key={id} article={Context.articles[id]}/>)}
+                <h1 className="page-title">{Context.tag.name}</h1>
+                {Object.keys(Context.tag.articles).map((id) => <ArticleItem key={id} article={Context.tag.articles[id]}/>)}
                 <div className="article-item last">© strng.pro {new Date().getFullYear()}</div>
             </div>
         </Wrapper>

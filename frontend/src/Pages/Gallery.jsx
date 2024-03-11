@@ -9,9 +9,13 @@ import Layout from "../Components/Layout.jsx"
 import Slider from "../Components/Slider.jsx";
 import Main from "../Components/Main.jsx";
 
-const Album = ({album, onLoaded}) =>
+import {check, add, load, action} from "../Reducers/Loader.jsx";
+
+const Album = ({item, dispatch}) =>
 {
     const delay = new Delayer(() => Renderer.async = false, 50);
+
+    useEffect(() => {dispatch(add(item.pictures[1]))}, []);
 
     const events = {
         onDragStart: e => e.preventDefault(),
@@ -20,34 +24,32 @@ const Album = ({album, onLoaded}) =>
         onTouchEnd: () => delay.call()
     };
 
-    return <Link to={"/blog/" + album.slug + '/'} className="box large" {...events}>
-        <img src={album.pictures[1]} alt={album.name} onLoad={() => onLoaded.call()}/>
+    return <Link to={"/blog/" + item.slug + '/'} className="box large" {...events}>
+        <img src={item.pictures[1] + '?stamp=' + Math.floor(Date.now()/1000)} alt={item.name} onLoad={() => dispatch(load(item.pictures[1])) && dispatch(check())}/>
         <div className="wrapper">
-            <div className="date">{album.date}</div>
-            <div className="title">{album.name}</div>
+            <div className="date">{item.date}</div>
+            <div className="title">{item.name}</div>
             <div className="social">
                 <ul>
-                    <li className="likes">{album.cnt_likes}</li>
-                    <li className="views">{album.cnt_views}</li>
-                    <li className="comments">{album.cnt_comments}</li>
+                    <li className="likes">{item.cnt_likes}</li>
+                    <li className="views">{item.cnt_views}</li>
+                    <li className="comments">{item.cnt_comments}</li>
                 </ul>
             </div>
         </div>
     </Link>;
 }
 
-export default connect(state => state.Mobiler)(({mobile, Context}) =>
+export default connect(state => state.Mobiler)(({mobile, Context, dispatch}) =>
 {
-    const ref = useRef(null), onLoaded = new Delayer(() => {document.body.classList.add('images-ready'); !mobile && ref.current?.classList.remove('loading-after'); return true}, 250);
-
-    useEffect(() => {document.body.classList.add('gallery'); !mobile && ref.current?.classList.add('loading-after')}, [mobile, Context.url]);
+    useEffect(() => {dispatch(action('sliderInit')); document.body.classList.add(...['gallery', !mobile && 'loading-after'].filter(v => v))}, [mobile, Context.url]);
 
     return <Layout articles={Context.articles}>
-        <Main role="main" className="wrapper" ref={ref}>
+        <Main role="main" className="wrapper" ref={useRef(null)}>
             <Link to="/" className="mobile-home-icon"></Link>
             <h1 className="page-title show-mobile">Фотографии</h1>
-            <Slider url={Context.url} key="gallery" onLoaded={() => onLoaded.call()}>
-                {Object.keys(Context.gallery).slice(0, 11).map((id) => <Album album={Context.gallery[id]} key={'gallery-' + id} onLoaded={onLoaded}/>)}
+            <Slider url={Context.url} key="gallery">
+                {Object.keys(Context.gallery).slice(0, 11).map(id => <Album item={Context.gallery[id]} dispatch={dispatch} key={'gallery-' + id}/>)}
             </Slider>
             <div className="box copyrights">
                 <div className="wrapper">

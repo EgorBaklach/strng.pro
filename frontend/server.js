@@ -7,6 +7,7 @@ const app = express()
 const vite = await createServer({
     server: {
         middlewareMode: true,
+        hmr: false,
         https: {
             key: fs.readFileSync('/etc/letsencrypt/live/dev.arg.me/privkey.pem'),
             cert: fs.readFileSync('/etc/letsencrypt/live/dev.arg.me/fullchain.pem'),

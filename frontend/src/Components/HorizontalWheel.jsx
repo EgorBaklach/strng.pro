@@ -5,7 +5,7 @@ import Delayer from "../Plugins/Delayer.jsx";
 
 export default connect(state => state.Mobiler)(({mobile, children, className}) =>
 {
-    const delay = new Delayer(wrapper => Renderer.scroll(wrapper.scrollLeft), 150), move = (event) =>
+    const delay = new Delayer(wrapper => Renderer.wheel(wrapper.scrollLeft), 150), move = (event) =>
     {
         if(mobile) return; const container = event.currentTarget.parentNode, distance = container.scrollLeft;
 

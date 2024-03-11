@@ -19,7 +19,7 @@ export default ({children, articles}) =>
                                 <ul>
                                     {
                                         Object.keys(articles).filter((id) => articles[id].props?.is_gallery).slice(0, 7).map((id, i) =>
-                                            <li key={id} className={i > 3 ? 'mobile-visible' : ''}><NavLink to={'/blog/' + articles[id].slug + '/'}>{articles[id].name}</NavLink></li>)
+                                            <li key={id} className={i > 2 ? 'mobile-visible' : ''}><NavLink to={'/blog/' + articles[id].slug + '/'}>{articles[id].name}</NavLink></li>)
                                     }
                                 </ul>
                             </li>
@@ -28,15 +28,15 @@ export default ({children, articles}) =>
                                 <ul>
                                     {
                                         Object.keys(articles).filter((id) => !articles[id].props?.is_gallery).slice(0, 7).map((id, i) =>
-                                            <li key={id} className={i > 3 ? 'mobile-visible' : ''}><NavLink to={'/blog/' + articles[id].slug + '/'}>{articles[id].name}</NavLink></li>)
+                                            <li key={id} className={i > 4 ? 'mobile-visible' : ''}><NavLink to={'/blog/' + articles[id].slug + '/'}>{articles[id].name}</NavLink></li>)
                                     }
                                 </ul>
                             </li>
                             <li>
-                                <Link to="/stock/">Склад</Link>
-                            </li>
-                            <li>
                                 <Link to="/about/">О проекте</Link>
+                                <ul>
+                                    <li><NavLink to="/about/stock/">Склад</NavLink></li>
+                                </ul>
                             </li>
                         </ul>
                     </nav>

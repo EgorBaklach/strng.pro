@@ -1,4 +1,4 @@
-import {Fragment, useEffect, useRef} from "react";
+import {createElement, forwardRef, Fragment, useEffect, useRef} from "react";
 import {Link} from "react-router-dom";
 import SyntaxHighlighter from "react-syntax-highlighter/dist/cjs/light-async.js";
 import YouTube from "react-youtube";
@@ -16,7 +16,17 @@ import Main from "../Components/Main.jsx";
 import Delayer from "../Plugins/Delayer.jsx";
 import Renderer from "../Plugins/Renderer.jsx";
 
-import {clean, close, insert} from "../Reducers/Imager.jsx";
+import {add as addImager, close} from "../Reducers/Imager.jsx";
+import {add as addLoader, check, load, action, list} from "../Reducers/Loader.jsx";
+
+const Sticker = connect(state => state.Mobiler, null, null, {forwardRef: true})(forwardRef(({mobile, width, title, src, dispatch, index}, ref) =>
+{
+    const img = <img src={src + '?stamp=' + Math.floor(Date.now() / 5000)} alt={title} style={{width}} onLoad={() => dispatch(load(src)) && dispatch(check())}/>;
+
+    useEffect(() => {dispatch(addLoader(src)) && dispatch(addImager(src))}, []);
+
+    return <Fragment>{createElement(mobile ? 'div' : 'a', !mobile ? {className: 'js-gallery-image', 'data-index': index, href: src} : null, img)}<br/>{title}</Fragment>;
+}))
 
 const code = ({className, ...props}) =>
 {
@@ -27,18 +37,16 @@ const code = ({className, ...props}) =>
 
 const Video = (props) => <YouTube {...props} ref={useRef(null)}/>
 
-const GridGalleryItem = function({src, title, iteration, insert})
+const GridGalleryItem = connect(state => state.Mobiler)(({src, title, index, dispatch}) =>
 {
-    useEffect(() => {insert({src})}, []); return <div className="image js-gallery-image" data-index={iteration}><img src={src} alt={title + ' - ' + iteration} /></div>
-}
+    useEffect(() => {dispatch(addLoader(src)) && dispatch(addImager(src))}, []);
 
-const GridGallertItemConnected = connect(null, {insert: slide => dispatch => dispatch(insert(slide))})(GridGalleryItem)
+    return <a href={src} className="image js-gallery-image" data-index={index}><img src={src} alt={title + ' - ' + ++index} onLoad={() => dispatch(load(src)) && dispatch(check())}/></a>
+})
 
-const GridGallery = ({mobile, pictures, title, images, clean}) =>
+const GridGallery = connect(state => state.Mobiler)(({mobile, pictures, title, images, dispatch}) =>
 {
-    const ref = useRef(null), onRender = new Delayer(() => (() => true)(Renderer.onScrollize.call()) && ref.current?._containerRef.current.classList.add('complite'), 150);
-
-    useEffect(() => clean, [])
+    const ref = useRef(null), onRender = new Delayer(() => {Renderer.onScroll.call(); ref.current?._containerRef.current.classList.add('complite')}, 150);
 
     return <JustifiedGrid
         className="justified-gallery"
@@ -48,19 +56,25 @@ const GridGallery = ({mobile, pictures, title, images, clean}) =>
         columnRange={mobile ? [2,3] : [3,5]}
         isCroppedSize={true}
         onRenderComplete={event => onRender.call(event)}>
-        {images.map((id, iteration) => <GridGallertItemConnected key={pictures[id]} iteration={iteration} src={pictures[id]} title={title} />)}
+        {images.map((id, index) => <GridGalleryItem key={pictures[id]} index={index} src={pictures[id]} title={title}  type="GridGallery"/>)}
     </JustifiedGrid>
-}
+})
 
-const GridGalleryConnected = connect(state => state.Mobiler, {clean: () => dispatch => dispatch(clean())})(GridGallery)
-
-const LigthboxComponent = ({list, index, close}) => list.length ? <Lightbox plugins={[Zoom]} render={{buttonZoom: () => null}} open={index >= 0} slides={list} close={close} index={index}/> : null
-
-const LightboxConnected = connect(state => state.Imager, {close: () => dispatch => dispatch(close())})(LigthboxComponent)
-
-export default connect(state => state.Mobiler)(({mobile, Context}) =>
+const LightboxComponent = connect(state => state.Imager)(({list, index, dispatch}) =>
 {
-    const Content = Context.content.default, pic = useRef(null); useEffect(() => document.body.classList.add('article-page'), [mobile, Context.url]);
+    const pictures = Object.values(list); return pictures.length ? <Lightbox plugins={[Zoom]} render={{buttonZoom: () => null}} open={index >= 0} slides={pictures} close={() => dispatch(close())} index={index}/> : null
+})
+
+export default connect(state => state.Mobiler)(({mobile, Context, dispatch}) =>
+{
+    const Content = Context.content.default, pic = useRef(null);
+
+    useEffect(() =>
+    {
+        dispatch(action(Context.props?.action)); dispatch(list([{'Roboto Slab': false}, 'article', true]));
+
+        document.body.classList.add(...['article-page', Context.props?.action === 'columnize' && !mobile && 'loading-after'].filter(v => v))
+    }, [mobile, Context.url]);
 
     Renderer.first = [
         <Link to="/" className="mobile-home-icon" key="home-icon"></Link>,
@@ -84,12 +98,12 @@ export default connect(state => state.Mobiler)(({mobile, Context}) =>
 
     return <Layout articles={Context.articles}>
         <Wrapper component="main" reverse={Main} role="main" className="wrapper">
-            <HorizontalWheel className={"container" + (Context.props?.horizontal ? " horizontal" : "")}>
-                {import.meta.env.SSR || !Context.props?.horizontal ? Renderer.first.map(value => value) : null}
-                <Content components={{code, Video, GridGallery: (props) => <GridGalleryConnected pictures={Context.pictures} title={Context.name} {...props}/>}}/>
-                {import.meta.env.SSR || !Context.props?.horizontal ? Renderer.last.map(value => value) : null}
+            <HorizontalWheel className={"container" + (Context.props?.action === 'columnize' ? " horizontal" : "")}>
+                {import.meta.env.SSR ? Renderer.first.map(value => value) : null}
+                <Content components={{code, Video, Sticker, GridGallery: (props) => <GridGallery pictures={Context.pictures} title={Context.name} {...props}/>}}/>
+                {import.meta.env.SSR ? Renderer.last.map(value => value) : null}
             </HorizontalWheel>
         </Wrapper>
-        <LightboxConnected type="lightbox"/>
+        <LightboxComponent type="lightbox"/>
     </Layout>;
 })

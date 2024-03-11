@@ -1,8 +1,14 @@
 <?php namespace App\Nodes;
 
 use Contracts\Cache\RememberInterface;
+use Helpers\Log;
 use Magistrale\Databases\ORMStrng;
+use PDOStatement;
 
+/**
+ * @method array articles(...$attibutes);
+ * @method array tag(...$attibutes);
+ */
 class Articles
 {
     /** @var ORMStrng */
@@ -10,6 +16,9 @@ class Articles
 
     /** @var RememberInterface */
     private $cache;
+
+    /** @var array */
+    private $result;
 
     private const months = [1 => 'Января', 2 => 'Февраля', 3 => 'Марта', 4 => 'Апреля', 5 => 'Мая', 6 => 'Июня', 7 => 'Июля', 8 => 'Августа', 9 => 'Сентября', 10 => 'Октября', 11 => 'Ноября', 12 => 'Декабря'];
 
@@ -25,24 +34,19 @@ class Articles
 
     public function gallery(): ?array
     {
-        return array_filter($this->all(), function($article)
+        return array_filter($this->articles()['articles'], function($article)
         {
             return $article['props']['is_gallery'];
         });
     }
 
-    public function article(string $slug): ?array
+    public function __call($name, $arguments)
     {
-        return $this->all()[md5($slug)];
-    }
+        if(!method_exists($this, $method = 'get'.ucfirst($name))) return null; $this->result = []; [$hash] = $arguments;
 
-    public function all(int $limit = 100): array
-    {
-        return $this->cache->remember('articles', 10, function() use ($limit)
+        return $this->cache->remember(implode('_', array_filter([$name, $hash])), 10, function() use ($method, $arguments)
         {
-            $articles = []; $amd5s = [];
-
-            $rs = $this->strng->table('articles')->where(['active=' => 'Y'])->order(['date_insert' => 'DESC'])->limit($limit)->select()->exec();
+            $rs = call_user_func([$this, $method], ...$arguments); $as = [];
 
             while($article = $rs->fetch())
             {
@@ -58,14 +62,14 @@ class Articles
 
                 $article['props'] = json_decode($article['props'], true, 512, JSON_BIGINT_AS_STRING);
 
-                $articles[$amd5s[$article['id']] = md5($article['slug'])] = $article;
+                $this->result['articles'][$as[$article['id']] = $article['slug']] = $article;
             }
 
-            if(count($articles))
+            if(count($this->result['articles']))
             {
                 $rs = $this->strng->table('a2t')
                     ->dependence('tags', 'LEFT', ['0:tid=' => '1:id'])
-                    ->where(['0:aid in ' => array_keys($amd5s)])
+                    ->where(['0:aid in ' => array_keys($as)])
                     ->order(['0:aid', '0:tid'])
                     ->select([
                         '0:aid as aid',
@@ -75,10 +79,33 @@ class Articles
                     ])
                     ->exec();
 
-                while($a2t = $rs->fetch()) $articles[$amd5s[$a2t['aid']]]['tags'][$a2t['tid']] = $a2t;
+                while($a2t = $rs->fetch()) $this->result['articles'][$as[$a2t['aid']]]['tags'][$a2t['tid']] = $a2t;
             }
 
-            return $articles;
+            return $this->result;
         });
+    }
+
+    private function getArticles(): PDOStatement
+    {
+        return $this->strng->table('articles')
+            ->where(['active=' => 'Y'])
+            ->order(['date_insert' => 'DESC'])
+            ->limit(100)
+            ->select()
+            ->exec();
+    }
+
+    private function getTag(string $slug): PDOStatement
+    {
+        $this->result = $this->strng->table('tags')->where(['slug=' => $slug])->select()->exec()->fetch();
+
+        return $this->strng->table('articles')
+            ->dependence('a2t', 'LEFT', ['0:id=' => '1:aid'])
+            ->where(['0:active=' => 'Y', '1:tid=' => $this->result['id']])
+            ->order(['0:date_insert' => 'DESC'])
+            ->limit(100)
+            ->select()
+            ->exec();
     }
 }

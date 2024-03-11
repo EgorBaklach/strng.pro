@@ -1,15 +1,15 @@
-import {createSlice} from "@reduxjs/toolkit"
+import {createSlice, current} from "@reduxjs/toolkit"
 
 export const Imager = createSlice({
     name: 'Imager',
     initialState: {
-        list: [],
+        list: {},
         index: -1
     },
     reducers: {
-        insert: (state, action) =>
+        add: (state, action) =>
         {
-            state.list.push(action.payload)
+            if(current(state)?.list[action.payload]) return; state.list[action.payload] = {src: action.payload};
         },
         open: (state, action) =>
         {
@@ -21,11 +21,11 @@ export const Imager = createSlice({
         },
         clean: (state) =>
         {
-            state.list = []
+            state.list = {}
         }
     },
 })
 
-export const { insert, open, close, clean } = Imager.actions
+export const { add, open, close, clean } = Imager.actions
 
 export default Imager.reducer

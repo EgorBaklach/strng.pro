@@ -32,7 +32,7 @@ abstract class ControllerAbstract
 
         return new JsonResponse($this->cache->remember('page_params_'.md5($request->getUri()->getPath()), 10, function() use ($name, $arguments)
         {
-            $params = $this->statics->get($name)->require() + ['articles' => $this->articles->all()];
+            $params = $this->statics->get($name)->require() + $this->articles->articles();
 
             return method_exists($this, $method = 'use'.ucfirst($name)) ? call_user_func([$this, $method], $params, $arguments) : $params;
         }));

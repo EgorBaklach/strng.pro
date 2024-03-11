@@ -1,5 +1,8 @@
 import {Link} from "react-router-dom";
+import {connect} from "react-redux";
 import {useEffect} from "react";
+
+import Renderer from "../Plugins/Renderer.jsx";
 
 import Layout from "../Components/Layout.jsx";
 import Wrapper from "../Components/Wrapper.jsx";
@@ -30,15 +33,15 @@ const MainGridBox = ({iterator, article}) =>
     </div>
 }
 
-export default ({Context}) =>
+export default connect(state => state.Mobiler)(({Context, mobile}) =>
 {
-    useEffect(() => document.body.classList.add('index'), []);
+    useEffect(() => {document.body.classList.add('index'); Renderer.onScroll.call()}, [mobile]);
 
     return <Layout articles={Context.articles}>
         <Wrapper component="main" reverse={Main} role="main" className="wrapper">
             <Link to="/" className="mobile-home-icon"></Link>
             <HorizontalWheel className="main-grid">
-                {Object.keys(Context.articles).slice(0, 11).map((id, iterator) => <MainGridBox iterator={iterator} article={Context.articles[id]} key={id}/>)}
+                {Object.keys(Context.articles).slice(0, 18).map((id, iterator) => <MainGridBox iterator={iterator} article={Context.articles[id]} key={id}/>)}
                 <div className="box copyrights">
                     <div className="wrapper">
                         <div className="date">© strng.pro {new Date().getFullYear()}</div>
@@ -47,4 +50,4 @@ export default ({Context}) =>
             </HorizontalWheel>
         </Wrapper>
     </Layout>;
-}
+});

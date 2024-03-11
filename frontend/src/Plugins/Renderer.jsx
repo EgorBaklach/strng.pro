@@ -1,25 +1,41 @@
-import {jsx} from "react/jsx-runtime";
+import {Fragment, jsx} from "react/jsx-runtime";
+import remarkDirective from "remark-directive";
 import AnimatedScroll from 'animated-scroll';
+import {visit} from "unist-util-visit";
+import {evaluate} from "@mdx-js/mdx";
 import $ from "jquery";
 
 import Delayer from "./Delayer.jsx"
 
 import {update} from "../Reducers/Mobiler.jsx";
-import {open} from "../Reducers/Imager.jsx";
+import {clean, open} from "../Reducers/Imager.jsx";
+import {check, load, reset} from "../Reducers/Loader.jsx";
 
 export default new class
 {
     constructor()
     {
-        this.onScrollize = new Delayer(this.scrollize.bind(this), 50);
-        this.onColumnize = new Delayer(this.columnize.bind(this), 50);
+        this.onScroll = new Delayer(this.scroll.bind(this), 150);
+        this.onAction = new Delayer(this.action.bind(this), 100);
         this.onResize = new Delayer(this.resize.bind(this), 50);
+        this.onRender = new Delayer(this.render.bind(this), 50);
 
-        this.dimensions = 0;
-        this.setDimensions = sum => sum;
+        this.plugins = {
+            'is-enum': symbol => ({hName: 'div', hProperties: {className: 'is-enum', 'data-symbol': symbol}}),
+            'is-deeper': () => ({hName: 'span', hProperties: {className: 'is-deeper'}}),
+            'is-higher': () => ({hName: 'span', hProperties: {className: 'is-higher'}}),
+            'span': () => ({hName: 'span', hProperties: {}}),
+        };
+
+        this.vw = !import.meta.env.SSR ? window.innerWidth * 0.01 : 0;
+        this.vh = !import.meta.env.SSR ? window.innerHeight * 0.01 : 0;
+
+        this.setChildrens = v => v;
+        this.childrens = null;
+        this.dispatch = null;
 
         this.scrollers = {};
-        this.children = [];
+        this.context = {};
         this.first = [];
         this.last = [];
 
@@ -27,36 +43,86 @@ export default new class
         this.rb = null;
 
         this.async = false;
+        this.init = false;
     }
 
-    scrollize()
+    scroll()
     {
-        document.body.classList.add('scroll-init'); Object.entries(this.scrollers).map(([k, ref]) => (() => true)(ref._ps.update()) && ref._container.classList.add('scroll-active')); return false
+        document.body.classList.add('scroll-init'); Object.entries(this.scrollers).map(([k, ref]) => (() => true)(ref._ps.update()) && ref._container.classList.add('scroll-active')); return false;
     }
 
-    destory()
+    destroy()
     {
-        document.body.removeAttribute('class'); this.container = this.as = null; this.sum_dem = this.width = this.pages = this.page = 0; this.scrollers = {};
+        document.body.removeAttribute('class');
+
+        this.onRender.finish = false;
+        this.init = false;
+
+        this.width = 0;
+        this.pages = 0;
+        this.page = 0;
+
+        this.container = null;
+        this.as = null;
+
+        this.scrollers = {};
+        this.context = {};
+
+        this.dispatch(clean());
+        this.dispatch(reset());
     }
 
     build()
     {
-        this.onColumnize.finish = this.init = false; setTimeout(() => this.onScrollize.call(), 150); return () => this.destory();
+        if(this.scrollers.main?._container.scrollTop) this.scrollers.main._container.scrollTop = 0; return () => this.destroy();
     }
 
-    resize(dispatch)
+    /////////////////
+    // ON EVALUATE //
+    /////////////////
+
+    remarkPlugin(node)
     {
-        document.documentElement.style.setProperty('--vh', window.innerHeight * 0.01 + 'px'); dispatch(update()); this.onScrollize.call(); this.setDimensions(window.innerWidth + window.innerHeight);
+        if(node.type === 'textDirective' || node.type === 'leafDirective' || node.type === 'containerDirective')
+        {
+            const [className, ...attr] = node.name.split('_'); node.data = this.plugins.hasOwnProperty(className) ? this.plugins[className](...attr) : {hName: 'div', hProperties: {className: className}};
+        }
+    }
+
+    async evaluate(content, jsx, jsxs)
+    {
+        return await evaluate(content, {jsx, jsxs, Fragment, development: false, remarkPlugins: [remarkDirective, () => tree => visit(tree, this.remarkPlugin.bind(this))]});
+    }
+
+    //////////////
+    // ON START //
+    //////////////
+
+    resize()
+    {
+        this.vw = window.innerWidth * 0.01; this.vh = window.innerHeight * 0.01; this.dispatch(update());
+
+        this.context?.props?.action === 'columnize' && window.innerWidth >= 768 && setTimeout(() => this.onAction.finish && this.columnize(), 100);
+
+        document.documentElement.style.setProperty('--vw', this.vw + 'px');
+        document.documentElement.style.setProperty('--vh', this.vh + 'px');
     }
 
     start(dispatch)
     {
-        document.querySelector("root").removeAttribute('data-ssr'); window.addEventListener('resize', () => this.onResize.call(dispatch));
+        this.dispatch = dispatch; document.querySelector("root").removeAttribute('data-ssr'); window.addEventListener('resize', () => this.onResize.call());
 
-        $(document).on('click', '.js-gallery-image', e => dispatch(open(e.currentTarget.getAttribute('data-index'))));
+        $(document).on('click', '.js-gallery-image', e => dispatch(open(e.currentTarget.getAttribute('data-index'))) && false);
 
-        document.documentElement.style.setProperty('--vh', window.innerHeight * 0.01 + 'px');
+        document.fonts.onloadingdone = e => e.fontfaces.map(font => dispatch(load(font.family)) && dispatch(check()));
+
+        document.documentElement.style.setProperty('--vw', this.vw + 'px');
+        document.documentElement.style.setProperty('--vh', this.vh + 'px');
     }
+
+    /////////////////////
+    // WHEEL AND SWIPE //
+    /////////////////////
 
     continue()
     {
@@ -67,7 +133,7 @@ export default new class
         this.async = false;
     }
 
-    scroll(distance)
+    wheel(distance)
     {
         this.page = Math.max(0, Math.floor((distance + (this.vw * 11.125))/ (this.vw * 58.5))); this.continue();
     }
@@ -79,42 +145,61 @@ export default new class
         this.as?.left(Math.max(0, this.vw * (58.5 * this.page - 11.125))).then(() => this.continue());
     }
 
-    columnize(children, setChildren)
+    ////////////
+    // RENDER //
+    ////////////
+
+    columnize()
     {
-        if(this.onColumnize.finish === false) return setChildren(this.children = [...this.first, ...children, ...this.last]);
+        if(window.innerWidth < 768) return true; let different = 0, list = [[]], innerHeight = window.innerHeight - window.innerWidth * 0.03; this.width = this.page = this.pages = 0;
 
-        if(window.innerWidth >= 768 && this.sum_dem !== this.dimensions)
+        document.body.classList.remove('columnizer-active');
+
+        for(const child of this.childrens)
         {
-            let different = 0, list = [[]]; this.sum_dem = this.dimensions; this.width = this.page = this.pages = 0; document.body.classList.remove('columnizer-active');
+            if(!child.ref?.current) continue; const {y, bottom} = child.ref.current.getBoundingClientRect();
 
-            this.children.every((child) =>
+            if((bottom + different) >= innerHeight * (this.pages + 1))
             {
-                if(!child.ref?.current) return true; const {y, bottom} = child.ref.current.getBoundingClientRect();
+                if(list[++this.pages] === undefined) list[this.pages] = []; different = innerHeight * this.pages - y;
+            }
 
-                if((bottom + different + window.innerWidth * 0.01 * 3) > window.innerHeight * (this.pages + 1))
-                {
-                    if(list[++this.pages] === undefined) list[this.pages] = []; different = window.innerHeight * this.pages - y;
-                }
-
-                list[this.pages].push(child); return true;
-            });
-
-            setChildren([...list.map((children, index) => jsx('div', {children, className: 'column', page: index + 1 + ' стр.'})), this.pages > 0 && this.lb, this.pages > 0 && this.rb].filter(v => v));
-
-            document.body.classList.add('columnizer-active');
+            list[this.pages].push(child);
         }
 
-        if(this.onColumnize.finish !== undefined)
+        this.setChildrens([...list.map((children, index) => jsx('div', {children, className: 'column', page: index + 1 + ' стр.'})), this.pages > 0 && this.lb, this.pages > 0 && this.rb].filter(v => v));
+
+        document.body.classList.add('columnizer-active'); document.body.classList.remove('loading-after');
+
+        this.lb.ref.current?.classList.remove('active'); this.rb.ref.current?.classList.add('active'); this.width = Math.max(0, Math.floor(this.vw * (58.5 * this.pages-- - 20)));
+
+        if(this.scrollers?.main)
         {
-            this.lb.ref.current?.classList.remove('active'); this.rb.ref.current?.classList.add('active');
-
-            this.vw = window.innerWidth * 0.01; this.width = Math.max(0, Math.floor(this.vw * (58.5 * this.pages-- - 20)));
-
-            this.scrollers?.main && (this.container = this.scrollers.main._container) && (this.as = new AnimatedScroll(this.container)) && (this.container.scrollLeft = 0);
-
-            this.onScrollize.call(); this.init = true;
+            this.as = new AnimatedScroll(this.container = this.scrollers.main._container); this.container.scrollLeft = 0;
         }
 
-        return null;
+        this.init = true; return this.after();
+    }
+
+    sliderInit()
+    {
+        document.body.classList.add('images-ready'); document.body.classList.remove('loading-after'); return this.after();
+    }
+
+    after()
+    {
+        this.onScroll.call(); return true;
+    }
+
+    action(state)
+    {
+        return !Object.entries(state.list).filter(([k, v]) => !v).length ? this[state.action ?? 'after']() : false;
+    }
+
+    render(childrens, setChildrens, context)
+    {
+        this.childrens = [...this.first, ...childrens, ...this.last]; this.setChildrens = setChildrens; this.context = context;
+
+        if(this.first.length || this.last.length) setChildrens(this.childrens); this.dispatch(check()); return true;
     }
 }

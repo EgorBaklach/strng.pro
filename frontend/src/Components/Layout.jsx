@@ -1,14 +1,10 @@
-import {Link, NavLink} from "react-router-dom";
-import {createElement, Fragment} from "react";
+import {Link, NavLink} from "react-router-dom"
+import {createElement, Fragment} from "react"
 import {connect} from "react-redux";
 
 import Scrollbar from "./Scrollbar.jsx";
 
 const ScrollbarConnect = connect(state => state.Mobiler)(({mobile, children, component}) => createElement(!mobile ? Scrollbar : component, {component}, children));
-
-const NavItem = ({article, i, limit}) => <li className={i >= limit ? 'mobile-visible' : ''}><NavLink to={'/blog/' + article.slug + '/'}>{article.name}</NavLink></li>
-
-const Navigation = ({articles, children}) => <nav className="menu" role="navigation">{articles && children}</nav>;
 
 export default ({children, articles}) =>
     <Fragment>
@@ -16,18 +12,24 @@ export default ({children, articles}) =>
             <ScrollbarConnect component="header" type="header">
                 <section className="header-fields">
                     <Link to="/" className="logo"></Link>
-                    <Navigation articles={articles}>
+                    <nav className="menu" role="navigation">
                         <ul>
                             <li>
                                 <Link to="/gallery/">Фотографии</Link>
                                 <ul>
-                                    {Object.keys(articles ?? {}).filter((id) => articles[id].props?.is_gallery).slice(0, 7).map((id, i) => <NavItem article={articles[id]} key={id} i={i} limit="3"/>)}
+                                    {
+                                        Object.keys(articles).filter((id) => articles[id].props?.is_gallery).slice(0, 7).map((id, i) =>
+                                            <li key={id} className={i > 2 ? 'mobile-visible' : ''}><NavLink to={'/blog/' + articles[id].slug + '/'}>{articles[id].name}</NavLink></li>)
+                                    }
                                 </ul>
                             </li>
                             <li>
                                 <Link to="/blog/">Блог</Link>
                                 <ul>
-                                    {Object.keys(articles ?? {}).filter((id) => !articles[id].props?.is_gallery).slice(0, 7).map((id, i) => <NavItem article={articles[id]} key={id} i={i} limit="4"/>)}
+                                    {
+                                        Object.keys(articles).filter((id) => !articles[id].props?.is_gallery).slice(0, 7).map((id, i) =>
+                                            <li key={id} className={i > 4 ? 'mobile-visible' : ''}><NavLink to={'/blog/' + articles[id].slug + '/'}>{articles[id].name}</NavLink></li>)
+                                    }
                                 </ul>
                             </li>
                             <li>
@@ -37,7 +39,7 @@ export default ({children, articles}) =>
                                 </ul>
                             </li>
                         </ul>
-                    </Navigation>
+                    </nav>
                     <div className="social">
                         <ul>
                             <li className="pegi"></li>

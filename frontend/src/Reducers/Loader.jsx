@@ -16,9 +16,7 @@ export const Loader = createSlice({
         },
         list: (state, {payload}) =>
         {
-            const [list, page, check] = payload, currentState = current(state); if(check && currentState.counter[page]) return;
-
-            state.list = {...currentState.list, ...list}; state.counter[page] = true;
+            const [list, check] = payload, currentState = current(state); if(check) for(const value of Object.keys(list)) if(currentState.counter[value]) return; state.list = {...currentState.list, ...list};
         },
         add: (state, {payload}) =>
         {
@@ -26,7 +24,7 @@ export const Loader = createSlice({
         },
         load: (state, {payload}) =>
         {
-            if(Renderer.onAction.finish) return; state.list[payload] = true;
+            if(Renderer.onAction.finish) return; state.list[payload] = state.counter[payload] = true;
         },
         check: state =>
         {

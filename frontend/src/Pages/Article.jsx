@@ -21,7 +21,7 @@ import {add as addLoader, check, load, action, list} from "../Reducers/Loader.js
 
 const Sticker = connect(state => state.Mobiler, null, null, {forwardRef: true})(forwardRef(({mobile, width, title, src, dispatch, index}, ref) =>
 {
-    const img = <img src={src + '?stamp=' + Math.floor(Date.now() / 5000)} alt={title} style={{width}} onLoad={() => dispatch(load(src)) && dispatch(check())}/>;
+    const img = <img src={src} alt={title} style={{width}} onLoad={() => dispatch(load(src)) && dispatch(check())}/>;
 
     useEffect(() => {dispatch(addLoader(src)) && dispatch(addImager(src))}, []);
 
@@ -71,7 +71,7 @@ export default connect(state => state.Mobiler)(({mobile, Context, dispatch}) =>
 
     useEffect(() =>
     {
-        dispatch(action(Context.props?.action)); dispatch(list([{'Roboto Slab': false}, 'article', true]));
+        dispatch(action(Context.props?.action)); dispatch(list([{'Roboto Slab': false}, true]));
 
         document.body.classList.add(...['article-page', Context.props?.action === 'columnize' && !mobile && 'loading-after'].filter(v => v))
     }, [mobile, Context.url]);

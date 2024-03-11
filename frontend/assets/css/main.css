@@ -781,9 +781,9 @@ root > .wrapper{
 
 .article-page root > .wrapper{
     position: relative;
-    font-family: "Roboto Slab", Tahoma, Arial, serif;
+    font-family: "Roboto Slab", Geometria, Arial, serif;
     text-overflow: ellipsis;
-    font-weight: 200;
+    font-weight: 300;
     font-size: .9vw;
 }
 .article-page aside:before{

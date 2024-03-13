@@ -855,10 +855,11 @@ root > .wrapper{
             position: relative;
             white-space: normal;
             padding: 1.5vw 4vw 1.5vw 0;
+            overflow: hidden;
             width: 58.5vw;
             height: 100%;
         }
-        .columnizer-active .container .column:before{
+        .columnizer-active .container .column:after{
             content: '';
             display: block;
             position: absolute;
@@ -866,9 +867,9 @@ root > .wrapper{
             width: 1px;
             top: 1.5vw;
             bottom: 1.5vw;
-            left: -2vw;
+            right: 2vw;
         }
-        .columnizer-active .container .column:after{
+        .columnizer-active .container .column:before{
             font-family: Geometria, Tahoma, Arial, serif;
             content: attr(page);
             font-weight: 700;
@@ -882,7 +883,7 @@ root > .wrapper{
             text-align: center;
             color: #888;
         }
-        .columnizer-active .container .column:first-child:before{
+        .columnizer-active .container .column:last-child:after{
             display: none;
         }
 

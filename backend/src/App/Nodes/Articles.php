@@ -98,14 +98,16 @@ class Articles
 
     private function getTag(string $slug): PDOStatement
     {
-        $this->result = $this->strng->table('tags')->where(['slug=' => $slug])->select()->exec()->fetch();
+        $tag = $this->strng->table('tags')->where(['slug=' => $slug])->select()->exec()->fetch();
 
-        return $this->strng->table('articles')
+        $rs = $this->strng->table('articles')
             ->dependence('a2t', 'LEFT', ['0:id=' => '1:aid'])
-            ->where(['0:active=' => 'Y', '1:tid=' => $this->result['id']])
+            ->where(['0:active=' => 'Y', '1:tid=' => $tag['id']])
             ->order(['0:date_insert' => 'DESC'])
             ->limit(100)
             ->select()
             ->exec();
+
+        if($rs->rowCount()) $this->result = $tag; return $rs;
     }
 }

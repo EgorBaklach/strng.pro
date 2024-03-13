@@ -167,7 +167,7 @@ export default new class
             list[this.pages].push(child);
         }
 
-        this.setChildrens([...list.map((children, index) => jsx('div', {children, className: 'column', page: index + 1 + ' стр.'})), this.pages > 0 && this.lb, this.pages > 0 && this.rb].filter(v => v));
+        this.setChildrens([this.pages > 0 && this.lb, this.pages > 0 && this.rb, ...list.map((children, index) => jsx('div', {children, className: 'column', page: index + 1 + ' стр.'}))].filter(v => v));
 
         document.body.classList.add('columnizer-active'); document.body.classList.remove('loading-after');
 

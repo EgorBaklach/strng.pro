@@ -17,6 +17,8 @@ const MainGridBox = ({iterator, article}) =>
     if(iterator%14 === 2 || iterator%14 === 7) boxClass = ' wide'
     if(iterator%14 === 4 || iterator%14 === 13) boxClass = ' tall'
 
+    if(iterator >= 21) boxClass += ' mobile-visible';
+
     return <div className={'box' + boxClass}>
         <Link to={"/blog/" + article.slug + '/'} className="picture" onDragStart={e => e.preventDefault()}><img src={article.pictures[1]} alt={article.name}/></Link>
         <div className="wrapper">
@@ -41,7 +43,7 @@ export default connect(state => state.Mobiler)(({Context, mobile}) =>
         <Wrapper component="main" reverse={Main} role="main" className="wrapper">
             <Link to="/" className="mobile-home-icon"></Link>
             <HorizontalWheel className="main-grid">
-                {Object.keys(Context.articles).slice(0, 18).map((id, iterator) => <MainGridBox iterator={iterator} article={Context.articles[id]} key={id}/>)}
+                {Object.keys(Context.articles).map((id, iterator) => <MainGridBox iterator={iterator} article={Context.articles[id]} key={id}/>)}
                 <div className="box copyrights">
                     <div className="wrapper">
                         <div className="date">© strng.pro {new Date().getFullYear()}</div>

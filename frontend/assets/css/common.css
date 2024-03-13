@@ -190,6 +190,10 @@ iframe{
     padding-top: 1.5vh;
 }
 
+.mobile-visible{
+    display: none;
+}
+
 @media screen and (max-width: 767px)
 {
     ol,
@@ -229,6 +233,10 @@ iframe{
     }
     .is-enum:before{
         right: calc(100% - 5vw);
+    }
+
+    .mobile-visible{
+        display: block;
     }
 }
 

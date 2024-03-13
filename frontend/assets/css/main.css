@@ -200,9 +200,6 @@ aside{
                                 margin-bottom: 1vh;
                                 padding: 0;
                             }
-                            header .menu > ul > li > ul li.mobile-visible{
-                                display: none;
-                            }
                                 header .menu > ul > li > ul li > a{
                                     font-size: .85vw;
                                     font-weight: 300;
@@ -444,6 +441,9 @@ root > .wrapper{
     position: relative;
     display: block;
 }
+.box.mobile-visible{
+    display: none;
+}
     .box .picture{
         display: block;
         width: 100%;
@@ -660,6 +660,7 @@ root > .wrapper{
             width: 16vw;
         }
             .main-grid .box .picture{
+                box-shadow: 0 2px 7px rgba(0,0,0,.3);
                 height: 100%;
             }
         .main-grid .box.large,
@@ -1117,9 +1118,6 @@ button.arrow.right{
                     header .menu > ul > li > ul li{
                         margin-bottom: 1vh;
                     }
-                    header .menu > ul > li > ul li.mobile-visible{
-                        display: block;
-                    }
                     header .menu > ul > li > ul > li a{
                         font-size: 3vw;
                     }
@@ -1169,13 +1167,13 @@ button.arrow.right{
     .box{
         width: calc(100% - 20vw);
         margin: 0 10vw 10vw;
+        display: block;
         padding: 0;
     }
         .main-grid .box .picture,
         .box .picture{
             height: 60vw;
             border-radius: 10px;
-            box-shadow: 0 2px 7px rgba(0,0,0,.3);
         }
             .box:hover .picture:after{
                 background-color: rgba(0,0,0,.5);

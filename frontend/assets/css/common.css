@@ -176,23 +176,59 @@ iframe{
 
 /* ENUMERATIONS */
 
-.is-enum{
+.is-enum,
+.is-list{
     padding-bottom: .7vh;
     padding-left: 1.5vw;
     position: relative;
 }
-.is-enum:before{
-    content: attr(data-symbol)'.';
+.is-enum:before,
+.is-list:before{
     position: absolute;
     right: calc(100% - 1.2vw);
 }
-.is-enum + *:not(.is-enum){
+.is-enum:before{
+    content: attr(data-symbol)'.';
+}
+.is-list:before{
+    content: '•';
+}
+.is-enum + *:not(.is-enum),
+.is-list + *:not(.is-list){
     padding-top: 1.5vh;
+}
+
+.small-sup{
+    font-size: 75%;
 }
 
 .mobile-visible{
     display: none;
 }
+
+/* CHAT-ICON */
+
+.chat-icon{
+    background-color: rgba(0,0,0,.5);
+    font-family: "Awesome", serif;
+    font-size: 130%;
+    font-weight: 900;
+    cursor: pointer;
+    position: fixed;
+    height: 2.8vw;
+    width: 2.8vw;
+    top: 1.5vw;
+    right: 1.5vw;
+    z-index: 4;
+}
+    .chat-icon:after{
+        transform: translate(-50%, -50%);
+        position: absolute;
+        content: '\f086';
+        display: block;
+        left: 50%;
+        top: 50%;
+    }
 
 @media screen and (max-width: 767px)
 {
@@ -237,6 +273,21 @@ iframe{
 
     .mobile-visible{
         display: block;
+    }
+
+    /* CHAT-ICON */
+
+    .chat-icon{
+        position: absolute;
+        background: none;
+        right: 10vw;
+        top: 8.75vw;
+        width: 10vw;
+        height: 10vw;
+    }
+    .chat-active .chat-icon{
+        position: fixed;
+        opacity: .25;
     }
 }
 
@@ -370,24 +421,30 @@ iframe{
 /* GRID GALLERY */
 
 .justified-gallery{
+    position: relative;
+    overflow: hidden;
+    height: 30vh;
     width: 100%;
-    visibility: hidden;
-    opacity: 0;
 }
+    .justified-gallery.loading-after:after{
+        position: absolute;
+    }
     .justified-gallery + *{
         padding-top: 2.2vh;
-    }
-    .justified-gallery.complite{
-        visibility: visible;
-        opacity: 1;
     }
     .justified-gallery .image{
         box-shadow: 0 2px 7px rgba(0, 0, 0, .3);
         border-radius: 10px;
+        visibility: hidden;
         overflow: hidden;
         cursor: pointer;
         display: block;
+        opacity: 0;
     }
+        .justified-gallery.complite .image{
+            visibility: visible;
+            opacity: 1;
+        }
         .justified-gallery .image img{
             object-fit: cover;
             width: 100%;

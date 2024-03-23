@@ -1,5 +1,6 @@
 <?php return [
     'status' => 200,
+    'page' => 'gallery',
     'reason_phrase' => 'Ok',
     'page_title' => 'Альбомы | Strong Elephant',
     'og_title' => 'Альбомы | Strong Elephant',

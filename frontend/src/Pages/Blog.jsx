@@ -11,12 +11,13 @@ import ArticleItem from "../Components/ArticleItem.jsx";
 
 export default connect(state => state.Mobiler)(({mobile, Context}) =>
 {
-    useEffect(() => {document.body.classList.add('article-page');  Renderer.onScroll.call()}, [mobile])
+    useEffect(() => {document.body.classList.add(...['article-page', !mobile && 'chat-active'].filter(v => v)); Renderer.onScroll.call()}, [mobile, Context.url])
 
     return <Layout articles={Context.articles}>
         <Wrapper component="main" reverse={Main} role="main" className="wrapper">
             <div className="container">
                 <Link to="/" className="mobile-home-icon"></Link>
+                <div className="chat-icon" onClick={() => document.body.classList.toggle('chat-active')}></div>
                 <div className="breadcrumbs">
                     <ul>
                         <li><Link to="/" title="Главная">Главная</Link></li>

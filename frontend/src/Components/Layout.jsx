@@ -1,10 +1,7 @@
 import {Link, NavLink} from "react-router-dom";
-import {createElement, Fragment} from "react";
-import {connect} from "react-redux";
+import {Fragment} from "react";
 
-import Scrollbar from "./Scrollbar.jsx";
-
-const ScrollbarConnect = connect(state => state.Mobiler)(({mobile, children, component}) => createElement(!mobile ? Scrollbar : component, {component}, children));
+import ScrollbarConnect from "./ScrollbarConnect.jsx";
 
 const NavItem = ({article, i, limit}) => <li className={i >= limit ? 'mobile-visible' : ''}><NavLink to={'/blog/' + article.slug + '/'}>{article.name}</NavLink></li>
 
@@ -13,7 +10,7 @@ const Navigation = ({articles, children}) => <nav className="menu" role="navigat
 export default ({children, articles}) =>
     <Fragment>
         <aside key="complementary" role="complementary" className="header">
-            <ScrollbarConnect component="header" type="header">
+            <ScrollbarConnect component="header" role="header">
                 <section className="header-fields">
                     <Link to="/" className="logo"></Link>
                     <Navigation articles={articles}>
@@ -51,4 +48,10 @@ export default ({children, articles}) =>
             <div className="header-mobile-hamburger" onClick={() => document.body.classList.toggle('header-mobile-open')}><span/></div>
         </aside>
         {children}
+        <section className="chat">
+            <ScrollbarConnect component="div" role="chat" className="chat-fields">
+                <div className="messages"></div>
+            </ScrollbarConnect>
+            <div className="user-form"></div>
+        </section>
     </Fragment>

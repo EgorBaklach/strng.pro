@@ -22,6 +22,7 @@ export default new class
 
         this.plugins = {
             'is-enum': symbol => ({hName: 'div', hProperties: {className: 'is-enum', 'data-symbol': symbol}}),
+            'is-list': () => ({hName: 'div', hProperties: {className: 'is-list'}}),
             'is-deeper': () => ({hName: 'span', hProperties: {className: 'is-deeper'}}),
             'is-higher': () => ({hName: 'span', hProperties: {className: 'is-higher'}}),
             'span': () => ({hName: 'span', hProperties: {}}),
@@ -135,14 +136,16 @@ export default new class
 
     wheel(distance)
     {
-        this.page = Math.max(0, Math.floor((distance + (this.vw * 11.125))/ (this.vw * 58.5))); this.continue();
+        const module = document.body.classList.contains('chat-active') ? 1.25 : 11.125; this.page = Math.max(0, Math.floor((distance + (this.vw * module))/ (this.vw * 58.5))); this.continue();
     }
 
     turn(event, check)
     {
-        if(this.async || this.pages < 0) return; this.async = true; check ? this.page++ : this.container.scrollLeft <= Math.max(0, this.vw * (58.5 * this.page - 11.125)) && this.page--;
+        if(this.async || this.pages < 0) return; this.async = true; const module = document.body.classList.contains('chat-active') ? 1.25 : 11.125;
 
-        this.as?.left(Math.max(0, this.vw * (58.5 * this.page - 11.125))).then(() => this.continue());
+        check ? this.page++ : this.container.scrollLeft <= Math.max(0, this.vw * (58.5 * this.page - module)) && this.page--;
+
+        this.as?.left(Math.max(0, this.vw * (58.5 * this.page - module))).then(() => this.continue());
     }
 
     ////////////
@@ -200,6 +203,8 @@ export default new class
     {
         this.childrens = [...this.first, ...childrens, ...this.last]; this.setChildrens = setChildrens;
 
-        if(this.first.length || this.last.length) setChildrens(this.childrens); this.dispatch(check()); return true;
+        if(this.first.length || this.last.length) setChildrens(this.childrens);
+
+        this.context?.page === 'article' && this.dispatch(check()); return true;
     }
 }

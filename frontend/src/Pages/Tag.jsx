@@ -25,6 +25,7 @@ export default connect(state => state.Mobiler)(({mobile, Context}) =>
                     </ul>
                 </div>
                 <h1 className="page-title">{Context.tag.name}</h1>
+                <div className="chat-icon" onClick={() => document.body.classList.toggle('chat-active')}></div>
                 {Object.keys(Context.tag.articles).map((id) => <ArticleItem key={id} article={Context.tag.articles[id]}/>)}
                 <div className="article-item last">© strng.pro {new Date().getFullYear()}</div>
             </div>

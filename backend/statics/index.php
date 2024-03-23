@@ -1,5 +1,6 @@
 <?php return [
     'status' => 200,
+    'page' => 'index',
     'reason_phrase' => 'Ok',
     'page_title' => 'Strong Elephant - застанет врасплох, схватит за шкирку, приведет в чувства',
     'og_title' => 'Strng.pro - Strong Elephant',

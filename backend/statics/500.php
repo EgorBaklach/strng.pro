@@ -1,5 +1,6 @@
 <?php return [
     'status' => 500,
+    'page' => 'error',
     'reason_phrase' => 'Internal Error',
     'page_title' => '500 Внутренняя ошибка',
     'og_title' => '500 Внутренняя ошибка',

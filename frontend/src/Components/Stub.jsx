@@ -12,7 +12,7 @@ export default connect(state => state.Mobiler)(({mobile, Context, chain, title})
 {
     const Content = Context.content?.default || (() => <Fragment/>);
 
-    useEffect(() => {document.body.classList.add('article-page'); Renderer.onScroll.call()}, [mobile, Context.url])
+    useEffect(() => {document.body.classList.add(...['article-page', !mobile && 'chat-active'].filter(v => v)); Renderer.onScroll.call()}, [mobile, Context.url])
 
     return <Layout articles={Context.articles}>
         <Wrapper component="main" reverse={Main} role="main" className="wrapper">
@@ -25,6 +25,7 @@ export default connect(state => state.Mobiler)(({mobile, Context, chain, title})
                     </ul>
                 </div>
                 <h1 className="page-title">{title}</h1>
+                <div className="chat-icon" onClick={() => document.body.classList.toggle('chat-active')}></div>
                 <Content/>
             </div>
         </Wrapper>

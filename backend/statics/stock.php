@@ -1,5 +1,6 @@
 <?php return [
     'status' => 202,
+    'page' => 'common',
     'reason_phrase' => 'Ok',
     'chain' => 'Склад',
     'page_title' => 'Ссылки на полезные статьи',

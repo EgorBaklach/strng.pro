@@ -1,5 +1,6 @@
 <?php return [
     'status' => 405,
+    'page' => 'error',
     'reason_phrase' => 'Method is not Allowed',
     'page_title' => '404 Метод не разрешен',
     'og_title' => '405 Метод не разрешен',

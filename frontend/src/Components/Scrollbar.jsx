@@ -6,5 +6,9 @@ import Renderer from "../Plugins/Renderer.jsx";
 
 export default (props) =>
 {
-    const Context = useOutletContext(), ref = useRef(null); useEffect(() => {Renderer.scrollers[ref.current.props.component] = ref.current}, [Context.url]); return <PerfectScrollbar {...props} ref={ref}/>
+    const Context = useOutletContext(), ref = useRef(null);
+
+    useEffect(() => {Renderer.scrollers[props.role] = ref.current}, [Context.url]);
+
+    return <PerfectScrollbar {...props} ref={ref}/>
 }

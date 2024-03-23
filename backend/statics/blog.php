@@ -1,5 +1,6 @@
 <?php return [
     'status' => 200,
+    'page' => 'common',
     'reason_phrase' => 'Ok',
     'page_title' => 'Блог | Strong Elephant',
     'og_title' => 'Блог | Strong Elephant',

@@ -1,5 +1,6 @@
 <?php return [
     'status' => 404,
+    'page' => 'error',
     'reason_phrase' => 'Not Found',
     'page_title' => '404 NOT FOUND',
     'og_title' => '404 NOT FOUND',

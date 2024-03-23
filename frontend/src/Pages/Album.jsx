@@ -6,7 +6,6 @@ import {useEffect, useRef, useState} from "react";
 import {connect} from "react-redux";
 
 import Delayer from "../Plugins/Delayer.jsx";
-import Renderer from "../Plugins/Renderer.jsx";
 
 import Wrapper from "../Components/Wrapper.jsx";
 import Layout from "../Components/Layout.jsx";
@@ -16,6 +15,7 @@ import Tags from "../Components/Tags.jsx";
 
 import {add as addImager, clean, close} from "../Reducers/Imager.jsx";
 import {add as addLoader, action, check, load} from "../Reducers/Loader.jsx";
+import Renderer from "../Plugins/Renderer.jsx";
 
 const LightboxComponent = connect(state => state.Imager)(({list, index, dispatch}) =>
 {
@@ -24,10 +24,10 @@ const LightboxComponent = connect(state => state.Imager)(({list, index, dispatch
 
 const GridGallery = (props) =>
 {
-    const ref = useRef(null), onRender = new Delayer(() => ref.current?._containerRef.current.classList.add('complite'), 150);
+    const ref = useRef(null), onRender = new Delayer(() => {Renderer.onScroll.call(); (list => {list.add('complite'); list.remove('loading-after')})(ref.current?._containerRef.current.classList)}, 150);
 
     return <JustifiedGrid
-        className="justified-gallery"
+        className="justified-gallery loading-after"
         useResizeObserver={true}
         gap={10}
         ref={ref}
@@ -66,7 +66,9 @@ export default connect(state => state.Mobiler)(({mobile, Context, dispatch}) =>
 
     return <Layout articles={Context.articles}>
         <Main role="main" className="wrapper" ref={useRef(null)}>
-            <ShowDetail className="detail-btn"/><Link to="/" className="mobile-home-icon"></Link>
+            <ShowDetail className="detail-btn"/>
+            <Link to="/" className="mobile-home-icon"></Link>
+            <div className="chat-icon" onClick={() => document.body.classList.toggle('chat-active')}></div>
             <Wrapper component="div" className="detail">
                 <div className="breadcrumbs" ref={useRef(null)} key="breadcrumbs">
                     <ul>

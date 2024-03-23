@@ -9,7 +9,7 @@ import Wrapper from "../Components/Wrapper.jsx";
 import HorizontalWheel from "../Components/HorizontalWheel.jsx";
 import Main from "../Components/Main.jsx";
 
-const MainGridBox = ({iterator, article}) =>
+const MainGridBox = ({iterator, article, hidden}) =>
 {
     let boxClass = ''
 
@@ -17,7 +17,7 @@ const MainGridBox = ({iterator, article}) =>
     if(iterator%14 === 2 || iterator%14 === 7) boxClass = ' wide'
     if(iterator%14 === 4 || iterator%14 === 13) boxClass = ' tall'
 
-    if(iterator >= 21) boxClass += ' mobile-visible';
+    if(hidden) boxClass += ' mobile-visible';
 
     return <div className={'box' + boxClass}>
         <Link to={"/blog/" + article.slug + '/'} className="picture" onDragStart={e => e.preventDefault()}><img src={article.pictures[1]} alt={article.name}/></Link>
@@ -39,11 +39,14 @@ export default connect(state => state.Mobiler)(({Context, mobile}) =>
 {
     useEffect(() => {document.body.classList.add('index'); Renderer.onScroll.call()}, [mobile]);
 
+    const aids = Object.keys(Context.articles), module = aids.length % 7, correctLength = aids.length - (module >= 4 ? module - 4 : module);
+
     return <Layout articles={Context.articles}>
         <Wrapper component="main" reverse={Main} role="main" className="wrapper">
             <Link to="/" className="mobile-home-icon"></Link>
+            <div className="chat-icon" onClick={() => document.body.classList.toggle('chat-active')}></div>
             <HorizontalWheel className="main-grid">
-                {Object.keys(Context.articles).map((id, iterator) => <MainGridBox iterator={iterator} article={Context.articles[id]} key={id}/>)}
+                {aids.map((id, iterator) => <MainGridBox iterator={iterator} article={Context.articles[id]} key={id} hidden={iterator >= correctLength}/>)}
                 <div className="box copyrights">
                     <div className="wrapper">
                         <div className="date">© strng.pro {new Date().getFullYear()}</div>

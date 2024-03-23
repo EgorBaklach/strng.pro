@@ -28,6 +28,8 @@ const Sticker = connect(state => state.Mobiler, null, null, {forwardRef: true})(
     return <Fragment>{createElement(mobile ? 'div' : 'a', !mobile ? {className: 'js-gallery-image', 'data-index': index, href: src} : null, img)}<br/>{title}</Fragment>;
 }))
 
+const Smallsup = ({color, children}) => <span style={{color}} className="small-sup">{children}</span>;
+
 const code = ({className, ...props}) =>
 {
     const match = /language-(\w+)/.exec(className || '');
@@ -41,15 +43,15 @@ const GridGalleryItem = connect(state => state.Mobiler)(({src, title, index, dis
 {
     useEffect(() => {dispatch(addLoader(src)) && dispatch(addImager(src))}, []);
 
-    return <a href={src} className="image js-gallery-image" data-index={index}><img src={src} alt={title + ' - ' + ++index} onLoad={() => dispatch(load(src)) && dispatch(check())}/></a>
+    return <a href={src} className="image js-gallery-image" data-index={index}><img src={src + '?stamp=' + Math.floor(Date.now()/1000)} alt={title + ' - ' + ++index} onLoad={() => dispatch(load(src)) && dispatch(check())}/></a>
 })
 
-const GridGallery = connect(state => state.Mobiler)(({mobile, pictures, title, images, dispatch}) =>
+const GridGalleryComponent = connect(state => state.Mobiler)(({mobile, pictures, title, images}) =>
 {
-    const ref = useRef(null), onRender = new Delayer(() => {Renderer.onScroll.call(); ref.current?._containerRef.current.classList.add('complite')}, 150);
+    const ref = useRef(null), onRender = new Delayer(() => {Renderer.onScroll.call(); (list => {list?.add('complite'); list?.remove('loading-after')})(ref.current?._containerRef.current.classList)}, 150);
 
     return <JustifiedGrid
-        className="justified-gallery"
+        className="justified-gallery loading-after"
         useResizeObserver={true}
         gap={10}
         ref={ref}
@@ -73,7 +75,8 @@ export default connect(state => state.Mobiler)(({mobile, Context, dispatch}) =>
     {
         dispatch(action(Context.props?.action)); dispatch(list([{'Roboto Slab': false}, true]));
 
-        document.body.classList.add(...['article-page', Context.props?.action === 'columnize' && !mobile && 'loading-after'].filter(v => v))
+        document.body.classList.add(...['article-page', !mobile && (Context.props?.action === 'columnize' ? 'loading-after' : 'chat-active')].filter(v => v))
+        //document.body.classList.add(...['article-page', Context.props?.action === 'columnize' && !mobile && 'loading-after', Context.props?.action !== 'columnize' && !mobile && 'chat-active'].filter(v => v))
     }, [mobile, Context.url]);
 
     Renderer.first = [
@@ -86,7 +89,10 @@ export default connect(state => state.Mobiler)(({mobile, Context, dispatch}) =>
             </ul>
         </div>,
         <h1 className="page-title" ref={useRef(null)} key="page-title">{Context.name}</h1>,
-        !Context.props?.hide_picture ? <div className="article-page-picture" ref={pic} key="article-page-picture"><img src={Context.pictures[1]} alt={Context.name}/></div> : null
+        !Context.props?.hide_picture ?
+            <div className="article-page-picture" ref={pic} key="article-page-picture"><img src={Context.pictures[1]}
+                                                                                            alt={Context.name}/>
+            </div> : null
     ];
 
     Renderer.last = [
@@ -96,11 +102,14 @@ export default connect(state => state.Mobiler)(({mobile, Context, dispatch}) =>
     Renderer.lb = <button ref={useRef(null)} className="arrow left" onClick={event => Renderer.turn(event, false)}></button>;
     Renderer.rb = <button ref={useRef(null)} className="arrow right active" onClick={event => Renderer.turn(event, true)}></button>;
 
+    const GridGallery = props => <GridGalleryComponent pictures={Context.pictures} title={Context.name} {...props}/>;
+
     return <Layout articles={Context.articles}>
         <Wrapper component="main" reverse={Main} role="main" className="wrapper">
             <HorizontalWheel className={"container" + (Context.props?.action === 'columnize' ? " horizontal" : "")}>
+                <div className="chat-icon" onClick={() => document.body.classList.toggle('chat-active')}></div>
                 {import.meta.env.SSR ? Renderer.first.map(value => value) : null}
-                <Content components={{code, Video, Sticker, GridGallery: (props) => <GridGallery pictures={Context.pictures} title={Context.name} {...props}/>}}/>
+                <Content components={{code, Video, Sticker, Smallsup, GridGallery}}/>
                 {import.meta.env.SSR ? Renderer.last.map(value => value) : null}
             </HorizontalWheel>
         </Wrapper>

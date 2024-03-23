@@ -25,7 +25,7 @@ const Album = ({item, dispatch}) =>
     };
 
     return <Link to={"/blog/" + item.slug + '/'} className="box large" {...events}>
-        <img src={item.pictures[1] + '?stamp=' + Math.floor(Date.now()/1000)} alt={item.name} onLoad={() => dispatch(load(item.pictures[1])) && dispatch(check())}/>
+        <img src={item.pictures[1] + '?stamp=' + Math.floor(Date.now()/5000)} alt={item.name} onLoad={() => dispatch(load(item.pictures[1])) && dispatch(check())}/>
         <div className="wrapper">
             <div className="date">{item.date}</div>
             <div className="title">{item.name}</div>
@@ -48,6 +48,7 @@ export default connect(state => state.Mobiler)(({mobile, Context, dispatch}) =>
         <Main role="main" className="wrapper" ref={useRef(null)}>
             <Link to="/" className="mobile-home-icon"></Link>
             <h1 className="page-title show-mobile">Фотографии</h1>
+            <div className="chat-icon" onClick={() => document.body.classList.toggle('chat-active')}></div>
             <Slider url={Context.url} key="gallery">
                 {Object.keys(Context.gallery).slice(0, 11).map(id => <Album item={Context.gallery[id]} dispatch={dispatch} key={'gallery-' + id}/>)}
             </Slider>

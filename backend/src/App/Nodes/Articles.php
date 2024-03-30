@@ -1,7 +1,6 @@
 <?php namespace App\Nodes;
 
 use Contracts\Cache\RememberInterface;
-use Helpers\Log;
 use Magistrale\Databases\ORMStrng;
 use PDOStatement;
 
@@ -20,6 +19,9 @@ class Articles
     /** @var array */
     private $result;
 
+    /** @var array */
+    private $stats;
+
     private const months = [1 => 'Января', 2 => 'Февраля', 3 => 'Марта', 4 => 'Апреля', 5 => 'Мая', 6 => 'Июня', 7 => 'Июля', 8 => 'Августа', 9 => 'Сентября', 10 => 'Октября', 11 => 'Ноября', 12 => 'Декабря'];
 
     public function __construct(ORMStrng $strng, RememberInterface $cache)
@@ -30,6 +32,14 @@ class Articles
     private function month($matches): string
     {
         [$match, $replace] = $matches; return self::months[$replace];
+    }
+
+    /** @return PDOStatement[] */
+    public function stats(float $uid): array
+    {
+        return [
+            'visits' => $this->strng->table('counter')->where(['address=' => $uid])->select(['aid'])->exec()
+        ];
     }
 
     public function gallery(): ?array
@@ -44,7 +54,7 @@ class Articles
     {
         if(!method_exists($this, $method = 'get'.ucfirst($name))) return null; $this->result = []; [$hash] = $arguments;
 
-        return $this->cache->remember(implode('_', array_filter([$name, $hash])), 10, function() use ($method, $arguments)
+        return $this->cache->remember(implode('_', array_filter([$name, $hash])), 60, function() use ($method, $arguments)
         {
             $rs = call_user_func([$this, $method], ...$arguments); $as = [];
 
@@ -82,7 +92,7 @@ class Articles
                 while($a2t = $rs->fetch()) $this->result['articles'][$as[$a2t['aid']]]['tags'][$a2t['tid']] = $a2t;
             }
 
-            return $this->result;
+            return array_key_exists('articles', $this->result) ? $this->result : null;
         });
     }
 

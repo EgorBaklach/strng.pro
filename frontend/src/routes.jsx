@@ -23,13 +23,15 @@ const _jsxs = (type, props, key) =>
     return jsxs(type, {...props, children, ref: ['symbol', 'function'].includes(typeof type) ? null : useRef(null)}, key);
 }
 
-const catcher = (url) => render({
+const catcher = url => render({
     status: 503,
     content: "Вероятно пропал интернет. Ничего страшного! Немного подождите, затем [обновите страницу](" + url + ")\n\r© strng.pro " + new Date().getFullYear(),
     page_title: '503 SERVER ERROR',
     articles: Renderer.context?.articles ?? {},
     url
 });
+
+const init = headers => ({headers: {...Object.fromEntries(headers), 'Content-Type': 'application/json'}});
 
 const render = async json => json.content ? {...json, content: await Renderer.evaluate(json.content, _jsx, _jsxs)} : json;
 
@@ -45,7 +47,7 @@ const ComponentConnected = (Component) => connect(state => state.Mobiler)(({mobi
 export default [
     {
         path: "/",
-        loader: ({request}) => fetch(request.url + 'index.json', {headers: {"Content-Type": "application/json"}}).then(resolve => resolve.json().then(json => render({...json, url: request.url}))).catch(() => catcher(request.url)),
+        loader: ({request: {url, headers}}) => fetch(url + 'index.json', init(headers)).then(resolve => resolve.json().then(json => render({...json, url}))).catch(() => catcher(url)),
         shouldRevalidate: (url) => url.currentUrl.pathname !== url.nextUrl.pathname,
         Component: connect()(({dispatch}) =>
         {

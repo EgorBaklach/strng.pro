@@ -16,14 +16,14 @@ import Main from "../Components/Main.jsx";
 import Delayer from "../Plugins/Delayer.jsx";
 import Renderer from "../Plugins/Renderer.jsx";
 
-import {add as addImager, close} from "../Reducers/Imager.jsx";
-import {add as addLoader, check, load, action, list} from "../Reducers/Loader.jsx";
+import Imager from "../Reducers/Imager.jsx";
+import Loader from "../Reducers/Loader.jsx";
 
 const Sticker = connect(state => state.Mobiler, null, null, {forwardRef: true})(forwardRef(({mobile, width, title, src, dispatch, index}, ref) =>
 {
-    const img = <img src={src} alt={title} style={{width}} onLoad={() => dispatch(load(src)) && dispatch(check())}/>;
+    const img = <img src={src} alt={title} style={{width}} onLoad={() => dispatch(Loader.actions.load(src)) && dispatch(Loader.actions.check())}/>;
 
-    useEffect(() => {dispatch(addLoader(src)) && dispatch(addImager(src))}, []);
+    useEffect(() => {dispatch(Loader.actions.add(src)) && dispatch(Imager.actions.add(src))}, []);
 
     return <Fragment>{createElement(mobile ? 'div' : 'a', !mobile ? {className: 'js-gallery-image', 'data-index': index, href: src} : null, img)}<br/>{title}</Fragment>;
 }))
@@ -41,9 +41,11 @@ const Video = (props) => <YouTube {...props} ref={useRef(null)}/>
 
 const GridGalleryItem = connect(state => state.Mobiler)(({src, title, index, dispatch}) =>
 {
-    useEffect(() => {dispatch(addLoader(src)) && dispatch(addImager(src))}, []);
+    useEffect(() => {dispatch(Loader.actions.add(src)) && dispatch(Imager.actions.add(src))}, []);
 
-    return <a href={src} className="image js-gallery-image" data-index={index}><img src={src + '?stamp=' + Math.floor(Date.now()/1000)} alt={title + ' - ' + ++index} onLoad={() => dispatch(load(src)) && dispatch(check())}/></a>
+    return <a href={src} className="image js-gallery-image" data-index={index}>
+        <img src={src + '?stamp=' + Math.floor(Date.now()/1000)} alt={title + ' - ' + ++index} onLoad={() => dispatch(Loader.actions.load(src)) && dispatch(Loader.actions.check())}/>
+    </a>
 })
 
 const GridGalleryComponent = connect(state => state.Mobiler)(({mobile, pictures, title, images}) =>
@@ -64,19 +66,23 @@ const GridGalleryComponent = connect(state => state.Mobiler)(({mobile, pictures,
 
 const LightboxComponent = connect(state => state.Imager)(({list, index, dispatch}) =>
 {
-    const pictures = Object.values(list); return pictures.length ? <Lightbox plugins={[Zoom]} render={{buttonZoom: () => null}} open={index >= 0} slides={pictures} close={() => dispatch(close())} index={index}/> : null
+    const pictures = Object.values(list); return pictures.length && <Lightbox plugins={[Zoom]} render={{buttonZoom: () => null}} open={index >= 0} slides={pictures} close={() => dispatch(Imager.actions.close())} index={index}/>;
 })
 
-export default connect(state => state.Mobiler)(({mobile, Context, dispatch}) =>
+const actions = {
+    dispatch: action => dispatch => dispatch(action),
+    visit: id => (dispatch, getState, {api}) => api.post(id)
+};
+
+export default connect(state => state.Mobiler, actions)(({Context, mobile, dispatch, visit}) =>
 {
     const Content = Context.content.default, pic = useRef(null);
 
     useEffect(() =>
     {
-        dispatch(action(Context.props?.action)); dispatch(list([{'Roboto Slab': false}, true]));
+        dispatch(Loader.actions.action(Context.props?.action)); dispatch(Loader.actions.list([{'Roboto Slab': false}, true])); !Context?.visited && visit(Context.id);
 
         document.body.classList.add(...['article-page', !mobile && (Context.props?.action === 'columnize' ? 'loading-after' : 'chat-active')].filter(v => v))
-        //document.body.classList.add(...['article-page', Context.props?.action === 'columnize' && !mobile && 'loading-after', Context.props?.action !== 'columnize' && !mobile && 'chat-active'].filter(v => v))
     }, [mobile, Context.url]);
 
     Renderer.first = [
@@ -89,10 +95,7 @@ export default connect(state => state.Mobiler)(({mobile, Context, dispatch}) =>
             </ul>
         </div>,
         <h1 className="page-title" ref={useRef(null)} key="page-title">{Context.name}</h1>,
-        !Context.props?.hide_picture ?
-            <div className="article-page-picture" ref={pic} key="article-page-picture"><img src={Context.pictures[1]}
-                                                                                            alt={Context.name}/>
-            </div> : null
+        !Context.props?.hide_picture ? <div className="article-page-picture" ref={pic} key="article-page-picture"><img src={Context.pictures[1]} alt={Context.name}/></div> : null
     ];
 
     Renderer.last = [

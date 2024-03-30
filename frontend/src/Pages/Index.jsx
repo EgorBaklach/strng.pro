@@ -8,6 +8,7 @@ import Layout from "../Components/Layout.jsx";
 import Wrapper from "../Components/Wrapper.jsx";
 import HorizontalWheel from "../Components/HorizontalWheel.jsx";
 import Main from "../Components/Main.jsx";
+import Social from "../Components/Social.jsx";
 
 const MainGridBox = ({iterator, article, hidden}) =>
 {
@@ -24,13 +25,7 @@ const MainGridBox = ({iterator, article, hidden}) =>
         <div className="wrapper">
             <div className="date">{article.date}</div>
             <div className="title">{article.name}</div>
-            <div className="social">
-                <ul>
-                    <li className="likes">{article.cnt_likes}</li>
-                    <li className="views">{article.cnt_views}</li>
-                    <li className="comments">{article.cnt_comments}</li>
-                </ul>
-            </div>
+            <Social article={article} key={"social-" + article.id}/>
         </div>
     </div>
 }

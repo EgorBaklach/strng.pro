@@ -894,7 +894,7 @@ button.slick-arrow,
 button.arrow{
     font-family: "Awesome", serif;
     font-weight: 900;
-    font-size: 100%;
+    font-size: 1vw;
     display: none;
     position: fixed;
     cursor: pointer;

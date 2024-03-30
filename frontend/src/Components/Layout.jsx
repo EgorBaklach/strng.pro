@@ -7,12 +7,14 @@ const NavItem = ({article, i, limit}) => <li className={i >= limit ? 'mobile-vis
 
 const Navigation = ({articles, children}) => <nav className="menu" role="navigation">{articles && children}</nav>;
 
+const ClientComponent = ({children}) => !import.meta.env.SSR && <Fragment>{children}</Fragment>;
+
 export default ({children, articles}) =>
     <Fragment>
         <aside key="complementary" role="complementary" className="header">
             <ScrollbarConnect component="header" role="header">
                 <section className="header-fields">
-                    <Link to="/" className="logo"></Link>
+                <Link to="/" className="logo"></Link>
                     <Navigation articles={articles}>
                         <ul>
                             <li>
@@ -48,10 +50,12 @@ export default ({children, articles}) =>
             <div className="header-mobile-hamburger" onClick={() => document.body.classList.toggle('header-mobile-open')}><span/></div>
         </aside>
         {children}
-        <section className="chat">
-            <ScrollbarConnect component="div" role="chat" className="chat-fields">
-                <div className="messages"></div>
-            </ScrollbarConnect>
-            <div className="user-form"></div>
-        </section>
+        <ClientComponent>
+            <section className="chat">
+                <ScrollbarConnect component="div" role="chat" className="chat-fields">
+                    <div className="messages"></div>
+                </ScrollbarConnect>
+                <div className="user-form"></div>
+            </section>
+        </ClientComponent>
     </Fragment>

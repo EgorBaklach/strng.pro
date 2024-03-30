@@ -2,7 +2,7 @@ import {createSlice, current} from "@reduxjs/toolkit"
 
 import Renderer from "../Plugins/Renderer.jsx";
 
-export const Loader = createSlice({
+export default createSlice({
     name: 'Loader',
     initialState: {
         action: null,
@@ -16,7 +16,11 @@ export const Loader = createSlice({
         },
         list: (state, {payload}) =>
         {
-            const [list, check] = payload, currentState = current(state); if(check) for(const value of Object.keys(list)) if(currentState.counter[value]) return; state.list = {...currentState.list, ...list};
+            const [list, check] = payload, currentState = current(state);
+
+            if(check) for(const value of Object.keys(list)) if(currentState.counter[value]) return;
+
+            state.list = {...currentState.list, ...list};
         },
         add: (state, {payload}) =>
         {
@@ -36,7 +40,3 @@ export const Loader = createSlice({
         }
     },
 })
-
-export const { action, list, add, load, check, reset } = Loader.actions
-
-export default Loader.reducer

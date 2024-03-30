@@ -9,13 +9,13 @@ import Layout from "../Components/Layout.jsx"
 import Slider from "../Components/Slider.jsx";
 import Main from "../Components/Main.jsx";
 
-import {check, add, load, action} from "../Reducers/Loader.jsx";
+import Loader from "../Reducers/Loader.jsx";
 
 const Album = ({item, dispatch}) =>
 {
     const delay = new Delayer(() => Renderer.async = false, 50);
 
-    useEffect(() => {dispatch(add(item.pictures[1]))}, []);
+    useEffect(() => {dispatch(Loader.actions.add(item.pictures[1]))}, []);
 
     const events = {
         onDragStart: e => e.preventDefault(),
@@ -25,7 +25,7 @@ const Album = ({item, dispatch}) =>
     };
 
     return <Link to={"/blog/" + item.slug + '/'} className="box large" {...events}>
-        <img src={item.pictures[1] + '?stamp=' + Math.floor(Date.now()/5000)} alt={item.name} onLoad={() => dispatch(load(item.pictures[1])) && dispatch(check())}/>
+        <img src={item.pictures[1] + '?stamp=' + Math.floor(Date.now()/5000)} alt={item.name} onLoad={() => dispatch(Loader.actions.load(item.pictures[1])) && dispatch(Loader.actions.check())}/>
         <div className="wrapper">
             <div className="date">{item.date}</div>
             <div className="title">{item.name}</div>
@@ -42,7 +42,7 @@ const Album = ({item, dispatch}) =>
 
 export default connect(state => state.Mobiler)(({mobile, Context, dispatch}) =>
 {
-    useEffect(() => {dispatch(action('sliderInit')); document.body.classList.add(...['gallery', !mobile && 'loading-after'].filter(v => v))}, [mobile, Context.url]);
+    useEffect(() => {dispatch(Loader.actions.action('sliderInit')); document.body.classList.add(...['gallery', !mobile && 'loading-after'].filter(v => v))}, [mobile, Context.url]);
 
     return <Layout articles={Context.articles}>
         <Main role="main" className="wrapper" ref={useRef(null)}>

@@ -211,7 +211,7 @@ iframe{
 .chat-icon{
     background-color: rgba(0,0,0,.5);
     font-family: "Awesome", serif;
-    font-size: 130%;
+    font-size: 1vw;
     font-weight: 900;
     cursor: pointer;
     position: fixed;
@@ -279,6 +279,7 @@ iframe{
 
     .chat-icon{
         position: absolute;
+        font-size: 4.5vw;
         background: none;
         right: 10vw;
         top: 8.75vw;

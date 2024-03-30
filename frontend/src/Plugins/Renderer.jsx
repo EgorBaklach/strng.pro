@@ -7,9 +7,11 @@ import $ from "jquery";
 
 import Delayer from "./Delayer.jsx"
 
-import {update} from "../Reducers/Mobiler.jsx";
-import {clean, open} from "../Reducers/Imager.jsx";
-import {check, load, reset} from "../Reducers/Loader.jsx";
+import Mobiler from "../Reducers/Mobiler.jsx";
+import Imager from "../Reducers/Imager.jsx";
+import Loader from "../Reducers/Loader.jsx";
+
+import Cookies from "./Cookies.jsx";
 
 export default new class
 {
@@ -30,6 +32,8 @@ export default new class
 
         this.vw = !import.meta.env.SSR ? window.innerWidth * 0.01 : 0;
         this.vh = !import.meta.env.SSR ? window.innerHeight * 0.01 : 0;
+
+        this.cookies = new Cookies();
 
         this.setChildrens = v => v;
         this.childrens = null;
@@ -69,13 +73,20 @@ export default new class
         this.scrollers = {};
         this.context = {};
 
-        this.dispatch(clean());
-        this.dispatch(reset());
+        this.dispatch(Imager.actions.clean());
+        this.dispatch(Loader.actions.reset());
     }
 
     build(context)
     {
-        if(this.scrollers.main?._container.scrollTop) this.scrollers.main._container.scrollTop = 0; this.context = context; return () => this.destroy();
+        if(this.scrollers.main?._container.scrollTop) this.scrollers.main._container.scrollTop = 0; this.context = context;
+
+        !this.context?.uid && this.cookies.set('uid', this.inet_aton(this.context.address), 365); return () => this.destroy();
+    }
+
+    inet_aton(addr)
+    {
+        const dv = new DataView(new ArrayBuffer(4)); Object.entries(addr.split('.')).forEach(([k, v]) => dv.setUint8(k, v)); return dv.getUint32(0) + '';
     }
 
     /////////////////
@@ -101,7 +112,7 @@ export default new class
 
     resize()
     {
-        this.vw = window.innerWidth * 0.01; this.vh = window.innerHeight * 0.01; this.dispatch(update());
+        this.vw = window.innerWidth * 0.01; this.vh = window.innerHeight * 0.01; this.dispatch(Mobiler.actions.update());
 
         this.context?.props?.action === 'columnize' && window.innerWidth >= 768 && setTimeout(() => this.onAction.finish && this.columnize(), 100);
 
@@ -111,11 +122,13 @@ export default new class
 
     start(dispatch)
     {
+        console.log('FIRSRT RENDER')
+
         this.dispatch = dispatch; document.querySelector("root").removeAttribute('data-ssr'); window.addEventListener('resize', () => this.onResize.call());
 
-        $(document).on('click', '.js-gallery-image', e => dispatch(open(e.currentTarget.getAttribute('data-index'))) && false);
+        $(document).on('click', '.js-gallery-image', e => dispatch(Imager.actions.open(e.currentTarget.getAttribute('data-index'))) && false);
 
-        document.fonts.onloadingdone = e => e.fontfaces.map(font => dispatch(load(font.family)) && dispatch(check()));
+        document.fonts.onloadingdone = e => e.fontfaces.map(font => dispatch(Loader.actions.load(font.family)) && dispatch(Loader.actions.check()));
 
         document.documentElement.style.setProperty('--vw', this.vw + 'px');
         document.documentElement.style.setProperty('--vh', this.vh + 'px');
@@ -205,6 +218,6 @@ export default new class
 
         if(this.first.length || this.last.length) setChildrens(this.childrens);
 
-        this.context?.page === 'article' && this.dispatch(check()); return true;
+        this.context?.page === 'article' && this.dispatch(Loader.actions.check()); return true;
     }
 }

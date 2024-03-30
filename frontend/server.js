@@ -4,6 +4,20 @@ import {createServer} from 'vite'
 
 const app = express()
 
+const createFetchRequest = (request, response) =>
+{
+    const url = new URL(request.originalUrl || request.url, `${request.protocol}://${request.get("host")}`), controller = new AbortController(), headers = new Headers(), init = {method: request.method, headers, signal: controller.signal}
+
+    response.on("close", () => controller.abort())
+
+    for(const [key, values] of Object.entries(request.headers))
+    {
+        if(key === 'connection') continue; if(Array.isArray(values)) for (let value of values) headers.append(key, value); else if(values) headers.set(key, values);
+    }
+
+    if(request.method !== "GET" && request.method !== "HEAD") init.body = request.body; return new Request(url, init);
+}
+
 const vite = await createServer({
     server: {
         middlewareMode: true,
@@ -14,29 +28,26 @@ const vite = await createServer({
         }
     },
     appType: 'custom'
-})
+});
 
-app.use(vite.middlewares)
+app.use(vite.middlewares);
 
 app.use('*', async (request, response) =>
 {
     try
     {
-        const url = request.originalUrl.replace('/', '')
+        const render = await vite.ssrLoadModule('./src/server.jsx').then(module => module.render(createFetchRequest(request, response)));
 
-        const render = await vite.ssrLoadModule('./src/server.jsx').then(module => module.render(request))
-
-        const html = await vite.transformIndexHtml(url, fs.readFileSync('index.html', 'utf-8')).then(template => template
+        const html = await vite.transformIndexHtml(request.originalUrl.replace('/', ''), fs.readFileSync('index.html', 'utf-8')).then(template => template
             .replace(`<!--app-head-->`, render.head ?? '')
             .replace(`<!--app-html-->`, render.html ?? '')
-        )
+        );
 
-        response.status(render.statusCode ?? 200).set({ 'Content-Type': 'text/html' }).end(html)
+        response.status(render.statusCode ?? 200).set({'Content-Type': 'text/html'}).end(html);
     }
     catch (e)
     {
-        vite?.ssrFixStacktrace(e)
-        response.status(500).end(e.stack)
+        vite?.ssrFixStacktrace(e); response.status(500).end(e.stack);
     }
 })
 

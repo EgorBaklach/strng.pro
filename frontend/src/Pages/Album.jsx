@@ -6,6 +6,7 @@ import {useEffect, useRef, useState} from "react";
 import {connect} from "react-redux";
 
 import Delayer from "../Plugins/Delayer.jsx";
+import Renderer from "../Plugins/Renderer.jsx";
 
 import Wrapper from "../Components/Wrapper.jsx";
 import Layout from "../Components/Layout.jsx";
@@ -13,13 +14,12 @@ import Slider from "../Components/Slider.jsx";
 import Main from "../Components/Main.jsx";
 import Tags from "../Components/Tags.jsx";
 
-import {add as addImager, clean, close} from "../Reducers/Imager.jsx";
-import {add as addLoader, action, check, load} from "../Reducers/Loader.jsx";
-import Renderer from "../Plugins/Renderer.jsx";
+import Imager from "../Reducers/Imager.jsx";
+import Loader from "../Reducers/Loader.jsx";
 
 const LightboxComponent = connect(state => state.Imager)(({list, index, dispatch}) =>
 {
-    const pictures = Object.values(list); return pictures.length ? <Lightbox plugins={[Zoom]} render={{buttonZoom: () => null}} open={index >= 0} slides={pictures} close={() => dispatch(close())} index={index}/> : null
+    const pictures = Object.values(list); return pictures.length ? <Lightbox plugins={[Zoom]} render={{buttonZoom: () => null}} open={index >= 0} slides={pictures} close={() => dispatch(Imager.actions.close())} index={index}/> : null
 });
 
 const GridGallery = (props) =>
@@ -44,10 +44,10 @@ export default connect(state => state.Mobiler)(({mobile, Context, dispatch}) =>
 
     const Picture = ({iteration, id}) =>
     {
-        useEffect(() => {dispatch(addLoader(Context.pictures[id])) && dispatch(addImager(Context.pictures[id]))}, []);
+        useEffect(() => {dispatch(Loader.actions.add(Context.pictures[id])) && dispatch(Imager.actions.add(Context.pictures[id]))}, []);
 
         return <div className={"box image" + (mobile ? " js-gallery-image" : "")} data-index={iteration}>
-            <img src={Context.pictures[id] + '?stamp=' + Math.floor(Date.now()/1000)} alt={Context.name + ' - ' + iteration} onLoad={() => dispatch(load(Context.pictures[id])) && dispatch(check())}/>
+            <img src={Context.pictures[id] + '?stamp=' + Math.floor(Date.now()/1000)} alt={Context.name + ' - ' + iteration} onLoad={() => dispatch(Loader.actions.load(Context.pictures[id])) && dispatch(Loader.actions.check())}/>
         </div>;
     };
 
@@ -62,7 +62,12 @@ export default connect(state => state.Mobiler)(({mobile, Context, dispatch}) =>
 
     const TagsContrainer = ({check, className}) => check && <Tags article={Context} ref={useRef(null)} key="tags" className={className}><li>{"© strng.pro " + new Date().getFullYear()}</li></Tags>;
 
-    useEffect(() => {dispatch(action('sliderInit')); document.body.classList.add(...['article-page', 'gallery', !mobile && 'loading-after'].filter(v => v)); return () => dispatch(clean()) && dispatch(close())}, [mobile, Context.url]);
+    useEffect(() =>
+    {
+        dispatch(Loader.actions.action('sliderInit')); document.body.classList.add(...['article-page', 'gallery', !mobile && 'loading-after'].filter(v => v));
+
+        return () => dispatch(Imager.actions.clean()) && dispatch(Imager.actions.close())
+    }, [mobile, Context.url]);
 
     return <Layout articles={Context.articles}>
         <Main role="main" className="wrapper" ref={useRef(null)}>

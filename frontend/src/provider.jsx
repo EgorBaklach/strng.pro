@@ -5,4 +5,21 @@ import Mobiler from "./Reducers/Mobiler.jsx";
 import Loader from "./Reducers/Loader.jsx";
 import Imager from "./Reducers/Imager.jsx";
 
-export default ({children}) => <Provider store={configureStore({reducer: {Imager, Mobiler, Loader}})}>{children}</Provider>;
+import api from "./api.jsx";
+
+const store = {
+    reducer: {
+        Mobiler: Mobiler.reducer,
+        Loader: Loader.reducer,
+        Imager: Imager.reducer
+    },
+    middleware: getDefaultMiddleware => getDefaultMiddleware({
+        thunk: {
+            extraArgument: {
+                api
+            }
+        }
+    })
+};
+
+export default ({children}) => <Provider store={configureStore(store)}>{children}</Provider>;

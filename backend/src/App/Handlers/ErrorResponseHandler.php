@@ -28,8 +28,12 @@ class ErrorResponseHandler implements ErrorHandlerInterface
     {
         $status = $error instanceof HttpExceptionInterface ? $error->getStatusCode() : $error->getCode();
 
-        $params = $this->statics->get(in_array($status, [404, 405]) ? $status : 500)->require() + $this->articles->articles();
+        $server = $request->getServerParams(); $cookies = $request->getCookieParams(); $address = $server['HTTP_X_REAL_IP'] ?: $server['REMOTE_ADDR'];
 
-        return new JsonResponse($params, $status);
+        $data = $this->statics->get(in_array($status, [404, 405]) ? $status : 500)->require() + ['uid' => $cookies['uid']] + compact('address') + $this->articles->articles();
+
+        foreach($this->articles->stats($cookies['uid'] ?: ip2long($address)) as $field => $rs) while($v = $rs->fetch()) $data[$field][$v['aid']] = true;
+
+        return new JsonResponse($data, $status);
     }
 }

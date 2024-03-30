@@ -11,7 +11,9 @@ import ArticleItem from "../Components/ArticleItem.jsx";
 
 export default connect(state => state.Mobiler)(({mobile, Context}) =>
 {
-    useEffect(() => {document.body.classList.add('article-page'); Renderer.onScroll.call()}, [mobile, Context.tag.slug])
+    // TODO Выводи все теги списком с колвом публикаций в виде облака тегов
+
+    useEffect(() => {document.body.classList.add(...['article-page', !mobile && 'chat-active'].filter(v => v)); Renderer.onScroll.call()}, [mobile, Context.tag.slug])
 
     return <Layout articles={Context.articles}>
         <Wrapper component="main" reverse={Main} role="main" className="wrapper">

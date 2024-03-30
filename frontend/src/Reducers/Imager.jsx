@@ -1,6 +1,6 @@
-import {createSlice, current} from "@reduxjs/toolkit"
+import {createSlice, current} from "@reduxjs/toolkit";
 
-export const Imager = createSlice({
+export default createSlice({
     name: 'Imager',
     initialState: {
         list: {},
@@ -24,8 +24,4 @@ export const Imager = createSlice({
             state.list = {}
         }
     },
-})
-
-export const { add, open, close, clean } = Imager.actions
-
-export default Imager.reducer
+});

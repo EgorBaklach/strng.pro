@@ -4,6 +4,7 @@ import {Provider} from "react-redux";
 import Mobiler from "./Reducers/Mobiler.jsx";
 import Loader from "./Reducers/Loader.jsx";
 import Imager from "./Reducers/Imager.jsx";
+import Socier from "./Reducers/Socier.jsx";
 
 import api from "./api.jsx";
 
@@ -11,7 +12,8 @@ const store = {
     reducer: {
         Mobiler: Mobiler.reducer,
         Loader: Loader.reducer,
-        Imager: Imager.reducer
+        Imager: Imager.reducer,
+        Socier: Socier.reducer
     },
     middleware: getDefaultMiddleware => getDefaultMiddleware({
         thunk: {

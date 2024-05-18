@@ -3,6 +3,7 @@ import remarkDirective from "remark-directive";
 import AnimatedScroll from 'animated-scroll';
 import {visit} from "unist-util-visit";
 import {evaluate} from "@mdx-js/mdx";
+import {io} from "socket.io-client";
 import $ from "jquery";
 
 import Delayer from "./Delayer.jsx"
@@ -10,6 +11,7 @@ import Delayer from "./Delayer.jsx"
 import Mobiler from "../Reducers/Mobiler.jsx";
 import Imager from "../Reducers/Imager.jsx";
 import Loader from "../Reducers/Loader.jsx";
+import Socier from "../Reducers/Socier.jsx";
 
 import Cookies from "./Cookies.jsx";
 
@@ -32,6 +34,8 @@ export default new class
 
         this.vw = !import.meta.env.SSR ? window.innerWidth * 0.01 : 0;
         this.vh = !import.meta.env.SSR ? window.innerHeight * 0.01 : 0;
+
+        this.socket = io({transports: ['websocket']});
 
         this.cookies = new Cookies();
 
@@ -81,12 +85,7 @@ export default new class
     {
         if(this.scrollers.main?._container.scrollTop) this.scrollers.main._container.scrollTop = 0; this.context = context;
 
-        !this.context?.uid && this.cookies.set('uid', this.inet_aton(this.context.address), 365); return () => this.destroy();
-    }
-
-    inet_aton(addr)
-    {
-        const dv = new DataView(new ArrayBuffer(4)); Object.entries(addr.split('.')).forEach(([k, v]) => dv.setUint8(k, v)); return dv.getUint32(0) + '';
+        !this.cookies.values?.uid && this.cookies.set('uid', this.context.uid, 365); return () => this.destroy();
     }
 
     /////////////////
@@ -122,8 +121,6 @@ export default new class
 
     start(dispatch)
     {
-        console.log('FIRSRT RENDER')
-
         this.dispatch = dispatch; document.querySelector("root").removeAttribute('data-ssr'); window.addEventListener('resize', () => this.onResize.call());
 
         $(document).on('click', '.js-gallery-image', e => dispatch(Imager.actions.open(e.currentTarget.getAttribute('data-index'))) && false);
@@ -132,6 +129,10 @@ export default new class
 
         document.documentElement.style.setProperty('--vw', this.vw + 'px');
         document.documentElement.style.setProperty('--vh', this.vh + 'px');
+
+        this.socket.on('answer', props => this[props.shift()](props));
+
+        return () => this.socket.off('answer');
     }
 
     /////////////////////
@@ -185,9 +186,9 @@ export default new class
 
         this.setChildrens([this.pages > 0 && this.lb, this.pages > 0 && this.rb, ...list.map((children, index) => jsx('div', {children, className: 'column', page: index + 1 + ' стр.'}))].filter(v => v));
 
-        document.body.classList.add('columnizer-active'); document.body.classList.remove('loading-after');
+        document.body.classList.add('columnizer-active'); document.body.classList.remove('loading-after'); this.lb.ref.current?.classList.remove('active'); this.rb.ref.current?.classList.add('active');
 
-        this.lb.ref.current?.classList.remove('active'); this.rb.ref.current?.classList.add('active'); this.width = Math.max(0, Math.floor(this.vw * (58.5 * this.pages-- - 20)));
+        this.width = Math.max(0, Math.floor(this.vw * (58.5 * this.pages-- - 20)));
 
         if(this.scrollers?.main)
         {
@@ -219,5 +220,14 @@ export default new class
         if(this.first.length || this.last.length) setChildrens(this.childrens);
 
         this.context?.page === 'article' && this.dispatch(Loader.actions.check()); return true;
+    }
+
+    ///////////////
+    // LISTENERS //
+    ///////////////
+
+    social(props)
+    {
+        this.dispatch(Socier.actions.insert(props));
     }
 }

@@ -27,7 +27,7 @@ abstract class ControllerAbstract
 
         $server = $request->getServerParams(); $cookies = $request->getCookieParams(); $address = $server['HTTP_X_REAL_IP'] ?: $server['REMOTE_ADDR'];
 
-        $data = $this->statics->get($name)->require() + ['uid' => $cookies['uid']] + compact('address') + $this->articles->articles();
+        $data = $this->statics->get($name)->require() + ['uid' => $cookies['uid'] ?: ip2long($address)] + compact('address') + $this->articles->articles() + ['visits' => [], 'likes' => []];
 
         foreach($this->articles->stats($cookies['uid'] ?: ip2long($address)) as $field => $rs) while($v = $rs->fetch()) $data[$field][$v['aid']] = true;
 

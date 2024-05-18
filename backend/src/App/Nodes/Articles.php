@@ -38,7 +38,8 @@ class Articles
     public function stats(float $uid): array
     {
         return [
-            'visits' => $this->strng->table('counter')->where(['address=' => $uid])->select(['aid'])->exec()
+            'visits' => $this->strng->table('views')->where(['uid=' => $uid])->select(['aid'])->exec(),
+            'likes' => $this->strng->table('likes')->where(['uid=' => $uid])->select(['aid'])->exec()
         ];
     }
 
@@ -54,7 +55,7 @@ class Articles
     {
         if(!method_exists($this, $method = 'get'.ucfirst($name))) return null; $this->result = []; [$hash] = $arguments;
 
-        return $this->cache->remember(implode('_', array_filter([$name, $hash])), 60, function() use ($method, $arguments)
+        return $this->cache->remember(implode('_', array_filter([$name, $hash])), 5, function() use ($method, $arguments)
         {
             $rs = call_user_func([$this, $method], ...$arguments); $as = [];
 

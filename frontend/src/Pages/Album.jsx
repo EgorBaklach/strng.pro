@@ -17,6 +17,8 @@ import Tags from "../Components/Tags.jsx";
 import Imager from "../Reducers/Imager.jsx";
 import Loader from "../Reducers/Loader.jsx";
 
+import Actions from "../Actions/Article.jsx";
+
 const LightboxComponent = connect(state => state.Imager)(({list, index, dispatch}) =>
 {
     const pictures = Object.values(list); return pictures.length ? <Lightbox plugins={[Zoom]} render={{buttonZoom: () => null}} open={index >= 0} slides={pictures} close={() => dispatch(Imager.actions.close())} index={index}/> : null
@@ -38,9 +40,9 @@ const GridGallery = (props) =>
     </JustifiedGrid>;
 }
 
-export default connect(state => state.Mobiler)(({mobile, Context, dispatch}) =>
+export default connect(state => state.Mobiler, Actions)(({mobile, Context, dispatch, socket}) =>
 {
-    const Content = Context.content.default;
+    const Content = Context.content.default; useEffect(() => {!Context?.visited && socket('views', Context.uid, Context.id, Context.cnt_views, 1)}, [Context.url]);
 
     const Picture = ({iteration, id}) =>
     {

@@ -1,6 +1,7 @@
 import {useLoaderData, Outlet, useOutletContext} from "react-router-dom";
 import {createElement, useEffect, useRef, useState} from "react";
 import {jsx, jsxs} from "react/jsx-runtime";
+import {io} from "socket.io-client";
 import {connect} from "react-redux";
 
 import Renderer from "./Plugins/Renderer.jsx";
@@ -28,6 +29,8 @@ const catcher = url => render({
     content: "Вероятно пропал интернет. Ничего страшного! Немного подождите, затем [обновите страницу](" + url + ")\n\r© strng.pro " + new Date().getFullYear(),
     page_title: '503 SERVER ERROR',
     articles: Renderer.context?.articles ?? {},
+    address: Renderer.context?.address ?? null,
+    uid: Renderer.context?.uid ?? null,
     url
 });
 
@@ -37,7 +40,7 @@ const render = async json => json.content ? {...json, content: await Renderer.ev
 
 const StubComponent = ({Context, ...props}) => <Stub {...props} Context={Context} chain={Context?.chain || Context.status} title={Context.page_title}/>;
 
-const ComponentConnected = (Component) => connect(state => state.Mobiler)(({mobile}) =>
+const ComponentConnected = Component => connect(state => state.Mobiler)(({mobile}) =>
 {
     const Context = useOutletContext(); Renderer.onAction.finish = false; Renderer.first = []; Renderer.last = [];
 
@@ -47,7 +50,7 @@ const ComponentConnected = (Component) => connect(state => state.Mobiler)(({mobi
 export default [
     {
         path: "/",
-        loader: ({request: {url, headers}}) => fetch(url + 'index.json', init(headers)).then(resolve => resolve.json().then(json => render({...json, url}))).catch(() => catcher(url)),
+        loader: ({request: {url, headers}}) => fetch((url => url.origin + url.pathname + 'index.json' + url.search)(new URL(url)), init(headers)).then(resolve => resolve.json().then(json => render({...json, url}))).catch(() => catcher(url)),
         shouldRevalidate: (url) => url.currentUrl.pathname !== url.nextUrl.pathname,
         Component: connect()(({dispatch}) =>
         {
@@ -59,8 +62,6 @@ export default [
             {path: 'blog/:slug', Component: ComponentConnected(Context => Context.props?.is_gallery ? Album : Article)},
             {path: 'tag/:slug', Component: ComponentConnected(() => Tag)},
             {path: 'gallery/', Component: ComponentConnected(() => Gallery)},
-            {path: 'about/', Component: ComponentConnected(() => StubComponent)},
-            {path: 'about/stock/', Component: ComponentConnected(() => StubComponent)},
             {path: '*', Component: ComponentConnected(() => StubComponent)}
         ]
     }

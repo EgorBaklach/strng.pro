@@ -587,12 +587,21 @@ root > .wrapper{
                     width: 1.1vw;
                 }
                 .box .social .likes{
-                    z-index: 1;
+                    z-index: 2;
+                    cursor: pointer;
                     background-color: rgba(0,0,0,.4);
                     padding: .5vw .7vw;
                 }
+                .box a.picture .social .likes{
+                    z-index: -1;
+                }
                 .box .social .likes:before{
                     content: '\f004';
+                }
+                .box .social .likes.active,
+                .box .social .likes:hover:before{
+                    color: firebrick;
+                    background-color: rgba(178, 34, 34, .075);
                 }
                 .box .social .views:before{
                     content: '\f06e';

@@ -19,6 +19,8 @@ import Renderer from "../Plugins/Renderer.jsx";
 import Imager from "../Reducers/Imager.jsx";
 import Loader from "../Reducers/Loader.jsx";
 
+import Actions from "../Actions/Article.jsx";
+
 const Sticker = connect(state => state.Mobiler, null, null, {forwardRef: true})(forwardRef(({mobile, width, title, src, dispatch, index}, ref) =>
 {
     const img = <img src={src} alt={title} style={{width}} onLoad={() => dispatch(Loader.actions.load(src)) && dispatch(Loader.actions.check())}/>;
@@ -69,18 +71,13 @@ const LightboxComponent = connect(state => state.Imager)(({list, index, dispatch
     const pictures = Object.values(list); return pictures.length && <Lightbox plugins={[Zoom]} render={{buttonZoom: () => null}} open={index >= 0} slides={pictures} close={() => dispatch(Imager.actions.close())} index={index}/>;
 })
 
-const actions = {
-    dispatch: action => dispatch => dispatch(action),
-    visit: id => (dispatch, getState, {api}) => api.post(id)
-};
-
-export default connect(state => state.Mobiler, actions)(({Context, mobile, dispatch, visit}) =>
+export default connect(state => state.Mobiler, Actions)(({Context, mobile, dispatch, socket}) =>
 {
-    const Content = Context.content.default, pic = useRef(null);
+    const Content = Context.content.default, pic = useRef(null); useEffect(() => {!Context?.visited && socket('views', Context.uid, Context.id, Context.cnt_views, 1)}, [Context.url]);
 
     useEffect(() =>
     {
-        dispatch(Loader.actions.action(Context.props?.action)); dispatch(Loader.actions.list([{'Roboto Slab': false}, true])); !Context?.visited && visit(Context.id);
+        dispatch(Loader.actions.action(Context.props?.action)); dispatch(Loader.actions.list([{'Roboto Slab': false}, true]));
 
         document.body.classList.add(...['article-page', !mobile && (Context.props?.action === 'columnize' ? 'loading-after' : 'chat-active')].filter(v => v))
     }, [mobile, Context.url]);

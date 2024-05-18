@@ -1,8 +1,10 @@
 import fs from 'fs'
 import express from 'express'
 import {createServer} from 'vite'
+import { Server } from "socket.io";
+import http from "http";
 
-const app = express()
+const app = express(), server = http.createServer(app), io = new Server(server);
 
 const createFetchRequest = (request, response) =>
 {
@@ -17,6 +19,8 @@ const createFetchRequest = (request, response) =>
 
     if(request.method !== "GET" && request.method !== "HEAD") init.body = request.body; return new Request(url, init);
 }
+
+io.on("connection", socket => socket.on('call', props => io.emit('answer', props)));
 
 const vite = await createServer({
     server: {
@@ -51,4 +55,4 @@ app.use('*', async (request, response) =>
     }
 })
 
-app.listen(3000, () => console.log('ready'));
+server.listen(3000, () => console.log('ready'));

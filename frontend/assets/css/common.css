@@ -278,6 +278,7 @@ iframe{
     /* CHAT-ICON */
 
     .chat-icon{
+        border-radius: 3px;
         position: absolute;
         font-size: 4.5vw;
         background: none;
@@ -287,6 +288,7 @@ iframe{
         height: 10vw;
     }
     .chat-active .chat-icon{
+        background-color: black;
         position: fixed;
         opacity: .25;
     }

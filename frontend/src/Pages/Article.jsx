@@ -19,7 +19,8 @@ import Renderer from "../Plugins/Renderer.jsx";
 import Imager from "../Reducers/Imager.jsx";
 import Loader from "../Reducers/Loader.jsx";
 
-import Actions from "../Actions/Article.jsx";
+import Stream from "../Actions/Stream.jsx";
+import Social from "../Actions/Social.jsx";
 
 const Sticker = connect(state => state.Mobiler, null, null, {forwardRef: true})(forwardRef(({mobile, width, title, src, dispatch, index}, ref) =>
 {
@@ -27,7 +28,7 @@ const Sticker = connect(state => state.Mobiler, null, null, {forwardRef: true})(
 
     useEffect(() => {dispatch(Loader.actions.add(src)) && dispatch(Imager.actions.add(src))}, []);
 
-    return <Fragment>{createElement(mobile ? 'div' : 'a', !mobile ? {className: 'js-gallery-image', 'data-index': index, href: src} : null, img)}<br/>{title}</Fragment>;
+    return <Fragment>{createElement(mobile ? 'div' : 'a', !mobile ? {className: 'js-gallery-image', 'data-index': index, href: src, ref} : null, img)}<br/>{title}</Fragment>;
 }))
 
 const Smallsup = ({color, children}) => <span style={{color}} className="small-sup">{children}</span>;
@@ -71,9 +72,9 @@ const LightboxComponent = connect(state => state.Imager)(({list, index, dispatch
     const pictures = Object.values(list); return pictures.length && <Lightbox plugins={[Zoom]} render={{buttonZoom: () => null}} open={index >= 0} slides={pictures} close={() => dispatch(Imager.actions.close())} index={index}/>;
 })
 
-export default connect(state => state.Mobiler, Actions)(({Context, mobile, dispatch, socket}) =>
+export default connect(state => state.Mobiler, {dispatch: action => dispatch => dispatch(action), ...Stream})(({Context, mobile, dispatch, subscribe}) =>
 {
-    const Content = Context.content.default, pic = useRef(null); useEffect(() => {!Context?.visited && socket('views', Context.uid, Context.id, Context.cnt_views, 1)}, [Context.url]);
+    const Content = Context.content.default, pic = useRef(null); useEffect(() => {subscribe('visits' + Context.id, props => Social.update('visits', Context.id, Context.cnt_visits, 1, ...props))}, [Context.url]);
 
     useEffect(() =>
     {

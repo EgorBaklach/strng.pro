@@ -6,9 +6,7 @@ class Main extends ControllerAbstract
 {
     public function useArticle(array $data, array $arguments): array
     {
-        if(!array_key_exists($arguments['slug'], $data['articles'])) throw new NotFoundException;
-
-        $article = $data['articles'][$arguments['slug']]; if($data['visits'][$article['id']]) $article['visited'] = true;
+        if(!array_key_exists($arguments['slug'], $data['articles'])) throw new NotFoundException; $article = $data['articles'][$arguments['slug']];
 
         $og_title = $page_title = $article['name'].' | Strong Elephant'; $og_description = $description = $article['announce'];
 

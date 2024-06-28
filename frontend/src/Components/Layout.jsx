@@ -1,4 +1,5 @@
 import {Link, NavLink} from "react-router-dom";
+import {connect} from "react-redux";
 import {Fragment} from "react";
 
 import ScrollbarConnect from "./ScrollbarConnect.jsx";
@@ -9,7 +10,7 @@ const Navigation = ({articles, children}) => <nav className="menu" role="navigat
 
 const ClientComponent = ({children}) => !import.meta.env.SSR && <Fragment>{children}</Fragment>;
 
-export default ({children, articles}) =>
+export default connect()(({children, articles}) =>
     <Fragment>
         <aside key="complementary" role="complementary" className="header">
             <ScrollbarConnect component="header" role="header">
@@ -53,9 +54,11 @@ export default ({children, articles}) =>
         <ClientComponent>
             <section className="chat">
                 <ScrollbarConnect component="div" role="chat" className="chat-fields">
-                    <div className="messages"></div>
+                    <div className="messages">
+
+                    </div>
                 </ScrollbarConnect>
                 <div className="user-form"></div>
             </section>
         </ClientComponent>
-    </Fragment>
+    </Fragment>);

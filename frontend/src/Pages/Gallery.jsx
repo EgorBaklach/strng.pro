@@ -7,6 +7,7 @@ import Renderer from "../Plugins/Renderer.jsx";
 
 import Layout from "../Components/Layout.jsx"
 import Slider from "../Components/Slider.jsx";
+import Social from "../Components/Social.jsx";
 import Main from "../Components/Main.jsx";
 
 import Loader from "../Reducers/Loader.jsx";
@@ -29,13 +30,7 @@ const Album = ({item, dispatch}) =>
         <div className="wrapper">
             <div className="date">{item.date}</div>
             <div className="title">{item.name}</div>
-            <div className="social">
-                <ul>
-                    <li className="likes">{item.cnt_likes}</li>
-                    <li className="views">{item.cnt_views}</li>
-                    <li className="comments">{item.cnt_comments}</li>
-                </ul>
-            </div>
+            <Social social={{likes: item.cnt_likes, visits: item.cnt_visits, comments: item.cnt_comments}} id={item.id} key={"social-" + item.id}/>
         </div>
     </Link>;
 }

@@ -510,7 +510,7 @@ root > .wrapper{
     }
         .box .title,
         .box .date,
-        .box .views,
+        .box .visits,
         .box .comments{
             position: relative;
             z-index: 1;
@@ -589,6 +589,7 @@ root > .wrapper{
                 .box .social .likes{
                     z-index: 2;
                     cursor: pointer;
+                    user-select: none;
                     background-color: rgba(0,0,0,.4);
                     padding: .5vw .7vw;
                 }
@@ -603,7 +604,7 @@ root > .wrapper{
                     color: firebrick;
                     background-color: rgba(178, 34, 34, .075);
                 }
-                .box .social .views:before{
+                .box .social .visits:before{
                     content: '\f06e';
                 }
                 .box .social .comments:before{

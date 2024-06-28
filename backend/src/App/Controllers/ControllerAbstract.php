@@ -3,7 +3,6 @@
 use App\Nodes\Articles;
 use Laminas\Diactoros\Response\JsonResponse;
 use Magistrale\Factories\Statics;
-use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -15,10 +14,9 @@ abstract class ControllerAbstract
     /** @var Statics */
     private $statics;
 
-    public function __construct(ContainerInterface $container)
+    public function __construct(Articles $articles, Statics $statics)
     {
-        $this->articles = $container->get(Articles::class);
-        $this->statics = $container->get(Statics::class);
+        $this->articles = $articles; $this->statics = $statics;
     }
 
     public function __call($name, $arguments): ResponseInterface
@@ -27,9 +25,7 @@ abstract class ControllerAbstract
 
         $server = $request->getServerParams(); $cookies = $request->getCookieParams(); $address = $server['HTTP_X_REAL_IP'] ?: $server['REMOTE_ADDR'];
 
-        $data = $this->statics->get($name)->require() + ['uid' => $cookies['uid'] ?: ip2long($address)] + compact('address') + $this->articles->articles() + ['visits' => [], 'likes' => []];
-
-        foreach($this->articles->stats($cookies['uid'] ?: ip2long($address)) as $field => $rs) while($v = $rs->fetch()) $data[$field][$v['aid']] = true;
+        $data = $this->statics->get($name)->require() + ['uid' => $cookies['uid'] ?: ip2long($address)] + compact('address') + $this->articles->articles();
 
         return new JsonResponse(method_exists($this, $method = 'use'.ucfirst($name)) ? call_user_func([$this, $method], $data, $arguments) : $data);
     }

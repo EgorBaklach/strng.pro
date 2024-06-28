@@ -42,6 +42,8 @@ export default new class
         this.setChildrens = v => v;
         this.childrens = null;
         this.dispatch = null;
+        this.stream = null;
+        this.api = null;
 
         this.scrollers = {};
         this.context = {};
@@ -57,7 +59,7 @@ export default new class
 
     scroll()
     {
-        document.body.classList.add('scroll-init'); Object.entries(this.scrollers).map(([k, ref]) => (() => true)(ref._ps.update()) && ref._container.classList.add('scroll-active')); return false;
+        document.body.classList.add('scroll-init'); Object.entries(this.scrollers).map(attributes => (ref => (() => true)(ref._ps.update()) && ref._container.classList.add('scroll-active'))(attributes.pop())); return false;
     }
 
     destroy()
@@ -96,7 +98,7 @@ export default new class
     {
         if(node.type === 'textDirective' || node.type === 'leafDirective' || node.type === 'containerDirective')
         {
-            const [className, ...attr] = node.name.split('_'); node.data = this.plugins.hasOwnProperty(className) ? this.plugins[className](...attr) : {hName: 'div', hProperties: {className: className}};
+            const [className, ...attr] = node.name.split('_'); node.data = this.plugins.hasOwnProperty(className) ? this.plugins[className](...attr) : {hName: 'div', hProperties: {className}};
         }
     }
 
@@ -119,9 +121,11 @@ export default new class
         document.documentElement.style.setProperty('--vh', this.vh + 'px');
     }
 
-    start(dispatch)
+    start({dispatch, request, remove, subscribe, clear})
     {
-        this.dispatch = dispatch; document.querySelector("root").removeAttribute('data-ssr'); window.addEventListener('resize', () => this.onResize.call());
+        this.dispatch = dispatch; this.api = {request, remove}; this.stream = {subscribe, clear}; document.querySelector("root").removeAttribute('data-ssr'); window.addEventListener('resize', () => this.onResize.call());
+
+        request('socials', 'GET', '/stats/index.json').then(r => dispatch(Socier.actions.init(r)) && remove('socials'));
 
         $(document).on('click', '.js-gallery-image', e => dispatch(Imager.actions.open(e.currentTarget.getAttribute('data-index'))) && false);
 
@@ -130,7 +134,7 @@ export default new class
         document.documentElement.style.setProperty('--vw', this.vw + 'px');
         document.documentElement.style.setProperty('--vh', this.vh + 'px');
 
-        this.socket.on('answer', props => this[props.shift()](props));
+        this.socket.on('answer', props => this[props.shift()](...props));
 
         return () => this.socket.off('answer');
     }
@@ -210,7 +214,7 @@ export default new class
 
     action(state)
     {
-        return !Object.entries(state.list).filter(([k, v]) => !v).length ? this[state.action ?? 'after']() : false;
+        return !Object.entries(state.list).filter(attributes => !attributes.pop()).length ? this[state.action ?? 'after']() : false;
     }
 
     render(childrens, setChildrens)
@@ -226,8 +230,8 @@ export default new class
     // LISTENERS //
     ///////////////
 
-    social(props)
+    social(instance, uid, id, ...props)
     {
-        this.dispatch(Socier.actions.insert(props));
+        const me = uid === this.context.uid * 1; this.dispatch(Socier.actions.insert([instance, me, id, ...props])) && me && this.api.remove(instance) && this.stream.clear(instance + id);
     }
 }

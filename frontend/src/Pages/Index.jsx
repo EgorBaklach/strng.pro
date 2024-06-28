@@ -10,7 +10,7 @@ import HorizontalWheel from "../Components/HorizontalWheel.jsx";
 import Main from "../Components/Main.jsx";
 import Social from "../Components/Social.jsx";
 
-const MainGridBox = ({iterator, Context, slug, hidden}) =>
+const MainGridBox = ({iterator, article, hidden}) =>
 {
     let boxClass = ''
 
@@ -20,14 +20,12 @@ const MainGridBox = ({iterator, Context, slug, hidden}) =>
 
     if(hidden) boxClass += ' mobile-visible';
 
-    const article = Context.articles[slug], social = {likes: article.cnt_likes, views: article.cnt_views, comments: article.cnt_comments};
-
     return <div className={'box' + boxClass}>
         <Link to={"/blog/" + article.slug + '/'} className="picture" onDragStart={e => e.preventDefault()}><img src={article.pictures[1]} alt={article.name}/></Link>
         <div className="wrapper">
             <div className="date">{article.date}</div>
             <div className="title">{article.name}</div>
-            <Social social={social} id={article.id} like={Context.likes[article.id]} uid={Context.uid} key={"social-" + article.id}/>
+            <Social social={{likes: article.cnt_likes, visits: article.cnt_visits, comments: article.cnt_comments}} id={article.id} key={"social-" + article.id}/>
         </div>
     </div>
 }
@@ -43,7 +41,7 @@ export default connect(state => state.Mobiler)(({Context, mobile}) =>
             <Link to="/" className="mobile-home-icon"></Link>
             <div className="chat-icon" onClick={() => document.body.classList.toggle('chat-active')}></div>
             <HorizontalWheel className="main-grid">
-                {aids.map((slug, iterator) => <MainGridBox iterator={iterator} Context={Context} slug={slug} key={slug} hidden={iterator >= correctLength}/>)}
+                {aids.map((slug, iterator) => <MainGridBox iterator={iterator} article={Context.articles[slug]} key={slug} hidden={iterator >= correctLength}/>)}
                 <div className="box copyrights">
                     <div className="wrapper">
                         <div className="date">© strng.pro {new Date().getFullYear()}</div>

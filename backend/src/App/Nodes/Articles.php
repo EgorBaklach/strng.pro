@@ -19,9 +19,6 @@ class Articles
     /** @var array */
     private $result;
 
-    /** @var array */
-    private $stats;
-
     private const months = [1 => 'Января', 2 => 'Февраля', 3 => 'Марта', 4 => 'Апреля', 5 => 'Мая', 6 => 'Июня', 7 => 'Июля', 8 => 'Августа', 9 => 'Сентября', 10 => 'Октября', 11 => 'Ноября', 12 => 'Декабря'];
 
     public function __construct(ORMStrng $strng, RememberInterface $cache)
@@ -32,15 +29,6 @@ class Articles
     private function month($matches): string
     {
         [$match, $replace] = $matches; return self::months[$replace];
-    }
-
-    /** @return PDOStatement[] */
-    public function stats(float $uid): array
-    {
-        return [
-            'visits' => $this->strng->table('views')->where(['uid=' => $uid])->select(['aid'])->exec(),
-            'likes' => $this->strng->table('likes')->where(['uid=' => $uid])->select(['aid'])->exec()
-        ];
     }
 
     public function gallery(): ?array

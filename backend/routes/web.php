@@ -1,7 +1,6 @@
 <?php
 
-use App\Controllers\Main;
-use App\Controllers\Update;
+use App\Controllers\{Get, Main, Update};
 use App\Middlewares\{CloseDBConnectionMiddleware, CredentialsMiddleware, ProfilerMiddleware};
 use Framework\Routers\LeagueRouter;
 use Psr\Container\ContainerInterface;
@@ -25,6 +24,8 @@ $router->get('/tag/{slug}/index.json', [Main::class, 'tag']);
 
 $router->get('/about/index.json', [Main::class, 'about']);
 $router->get('/about/stock/index.json', [Main::class, 'stock']);
+
+$router->get('/stats/index.json', [Get::class, 'social']);
 
 ////////////// POST
 

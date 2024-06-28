@@ -25,7 +25,7 @@ export default connect(state => state.Mobiler)(({mobile, Context}) =>
                     </ul>
                 </div>
                 <h1 className="page-title">Блог</h1>
-                {Object.keys(Context.articles).map(slug => <ArticleItem key={slug} like={Context.likes[Context.articles[slug].id]} uid={Context.uid} article={Context.articles[slug]}/>)}
+                {Object.keys(Context.articles).map(slug => <ArticleItem key={slug} article={Context.articles[slug]}/>)}
                 <div className="article-item last">© strng.pro {new Date().getFullYear()}</div>
             </div>
         </Wrapper>

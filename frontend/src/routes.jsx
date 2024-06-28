@@ -1,7 +1,6 @@
 import {useLoaderData, Outlet, useOutletContext} from "react-router-dom";
 import {createElement, useEffect, useRef, useState} from "react";
 import {jsx, jsxs} from "react/jsx-runtime";
-import {io} from "socket.io-client";
 import {connect} from "react-redux";
 
 import Renderer from "./Plugins/Renderer.jsx";
@@ -14,6 +13,9 @@ import Album from "./Pages/Album.jsx";
 import Tag from "./Pages/Tag.jsx";
 
 import Stub from "./Components/Stub.jsx";
+
+import Stream from "./Actions/Stream.jsx";
+import Api from "./Actions/Api.jsx";
 
 const _jsx = (type, props, key) => jsx(type, {...props, ref: ['symbol', 'function'].includes(typeof type) ? null : useRef(null)}, key);
 
@@ -52,9 +54,9 @@ export default [
         path: "/",
         loader: ({request: {url, headers}}) => fetch((url => url.origin + url.pathname + 'index.json' + url.search)(new URL(url)), init(headers)).then(resolve => resolve.json().then(json => render({...json, url}))).catch(() => catcher(url)),
         shouldRevalidate: (url) => url.currentUrl.pathname !== url.nextUrl.pathname,
-        Component: connect()(({dispatch}) =>
+        Component: connect(null, {dispatch: action => dispatch => dispatch(action), ...Api, ...Stream})(props =>
         {
-            useEffect(() => Renderer.start(dispatch), []); return <Outlet context={useLoaderData()}/>
+            useEffect(() => Renderer.start(props), []); return <Outlet context={useLoaderData()}/>
         }),
         children: [
             {index: true, Component: ComponentConnected(() => Index)},

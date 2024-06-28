@@ -17,7 +17,8 @@ import Tags from "../Components/Tags.jsx";
 import Imager from "../Reducers/Imager.jsx";
 import Loader from "../Reducers/Loader.jsx";
 
-import Actions from "../Actions/Article.jsx";
+import Stream from "../Actions/Stream.jsx";
+import Social from "../Actions/Social.jsx";
 
 const LightboxComponent = connect(state => state.Imager)(({list, index, dispatch}) =>
 {
@@ -40,9 +41,9 @@ const GridGallery = (props) =>
     </JustifiedGrid>;
 }
 
-export default connect(state => state.Mobiler, Actions)(({mobile, Context, dispatch, socket}) =>
+export default connect(state => state.Mobiler, {dispatch: action => dispatch => dispatch(action), ...Stream})(({mobile, Context, dispatch, subscribe}) =>
 {
-    const Content = Context.content.default; useEffect(() => {!Context?.visited && socket('views', Context.uid, Context.id, Context.cnt_views, 1)}, [Context.url]);
+    const Content = Context.content.default; useEffect(() => {subscribe('visits' + Context.id, props => Social.update('visits', Context.id, Context.cnt_visits, 1, ...props))}, [Context.url]);
 
     const Picture = ({iteration, id}) =>
     {

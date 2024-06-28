@@ -30,7 +30,7 @@ class Update
             switch(true)
             {
                 case $uid < 0 || $uid > 4294967295: throw new ErrorException('UID is Not Corrected');
-                case !in_array($value, [-1, 1]) || ($value === -1 && $arguments['table'] === 'views'): throw new ErrorException('Value is Not Corrected');
+                case !in_array($value, [-1, 1]) || ($value === -1 && $arguments['table'] === 'visits'): throw new ErrorException('Value is Not Corrected');
             }
 
             switch($value)
@@ -46,6 +46,6 @@ class Update
             return new JsonResponse(['abort' => true, 'message' => $e->getMessage()], 500);
         }
 
-        return new JsonResponse(['success' => true], 200);
+        return new JsonResponse(['success' => true] + compact('uid'), 200);
     }
 }

@@ -6,7 +6,8 @@ import Loader from "./Reducers/Loader.jsx";
 import Imager from "./Reducers/Imager.jsx";
 import Socier from "./Reducers/Socier.jsx";
 
-import api from "./api.jsx";
+import stream from "./Services/Stream.jsx";
+import api from "./Services/Api.jsx";
 
 const store = {
     reducer: {
@@ -18,6 +19,7 @@ const store = {
     middleware: getDefaultMiddleware => getDefaultMiddleware({
         thunk: {
             extraArgument: {
+                stream,
                 api
             }
         }

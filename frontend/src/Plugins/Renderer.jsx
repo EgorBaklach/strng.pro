@@ -9,9 +9,11 @@ import $ from "jquery";
 import Delayer from "./Delayer.jsx"
 
 import Mobiler from "../Reducers/Mobiler.jsx";
+import Chater from "../Reducers/Chater.jsx";
 import Imager from "../Reducers/Imager.jsx";
 import Loader from "../Reducers/Loader.jsx";
 import Socier from "../Reducers/Socier.jsx";
+import User from "../Reducers/User.jsx";
 
 import Cookies from "./Cookies.jsx";
 
@@ -40,6 +42,7 @@ export default new class
         this.cookies = new Cookies();
 
         this.setChildrens = v => v;
+        this.chatMessages = null;
         this.childrens = null;
         this.dispatch = null;
         this.stream = null;
@@ -59,7 +62,14 @@ export default new class
 
     scroll()
     {
-        document.body.classList.add('scroll-init'); Object.entries(this.scrollers).map(attributes => (ref => (() => true)(ref._ps.update()) && ref._container.classList.add('scroll-active'))(attributes.pop())); return false;
+        const promises = Object.entries(this.scrollers).map(values =>
+        {
+            const ref = values.pop(), classList = ref._container.classList; ref._ps.update(); if(classList.contains('scroll-active')) return true; classList.add('scroll-active'); return true;
+        });
+
+        Promise.all(promises).then(() => document.body.classList.add('scroll-init'));
+
+        return false;
     }
 
     destroy()
@@ -121,15 +131,22 @@ export default new class
         document.documentElement.style.setProperty('--vh', this.vh + 'px');
     }
 
+    catch(error, instance)
+    {
+        !error?.in_process && this.api.remove(instance); return true;
+    }
+
     start({dispatch, request, remove, subscribe, clear})
     {
         this.dispatch = dispatch; this.api = {request, remove}; this.stream = {subscribe, clear}; document.querySelector("root").removeAttribute('data-ssr'); window.addEventListener('resize', () => this.onResize.call());
 
-        request('socials', 'GET', '/stats/index.json').then(r => dispatch(Socier.actions.init(r)) && remove('socials'));
-
         $(document).on('click', '.js-gallery-image', e => dispatch(Imager.actions.open(e.currentTarget.getAttribute('data-index'))) && false);
 
-        document.fonts.onloadingdone = e => e.fontfaces.map(font => dispatch(Loader.actions.load(font.family)) && dispatch(Loader.actions.check()));
+        document.fonts.onloadingdone = e => e.fontfaces.map(font => dispatch(Loader.actions.load(font.family.replace(/"/g, ''))) && dispatch(Loader.actions.check()));
+
+        request('chat.messages', 'GET', '/chat/messages/index.json').then(r => dispatch(Chater.actions.init(r)) && remove('chat.messages')).catch(r => this.catch(r, 'chat.messages'));
+        request('socials', 'GET', '/stats/index.json').then(r => dispatch(Socier.actions.init(r)) && remove('socials')).catch(r => this.catch(r, 'socials'));
+        request('user', 'GET', '/me/index.json').then(r => dispatch(User.actions.init(r)) && remove('user')).catch(r => this.catch(r, 'user'));
 
         document.documentElement.style.setProperty('--vw', this.vw + 'px');
         document.documentElement.style.setProperty('--vh', this.vh + 'px');
@@ -145,9 +162,9 @@ export default new class
 
     continue()
     {
-        this.container.scrollLeft > 0 ? this.lb.ref.current.classList.add('active') : this.lb.ref.current.classList.remove('active')
+        this.container.scrollLeft > 0 ? this.lb.ref.current.classList.add('active') : this.lb.ref.current.classList.remove('active');
 
-        this.page >= this.pages && this.container.scrollLeft >= this.width ? this.rb.ref.current.classList.remove('active') : this.rb.ref.current.classList.add('active')
+        this.page >= this.pages && this.container.scrollLeft >= this.width ? this.rb.ref.current.classList.remove('active') : this.rb.ref.current.classList.add('active');
 
         this.async = false;
     }
@@ -214,7 +231,7 @@ export default new class
 
     action(state)
     {
-        return !Object.entries(state.list).filter(attributes => !attributes.pop()).length ? this[state.action ?? 'after']() : false;
+        return !Object.entries(state.list).filter(values => !values.pop()).length ? this[state.action ?? 'after']() : false;
     }
 
     render(childrens, setChildrens)
@@ -229,6 +246,18 @@ export default new class
     ///////////////
     // LISTENERS //
     ///////////////
+
+    chat(instance, id, {uid, ...props})
+    {
+        const me = uid === this.context.uid * 1;
+
+        switch (instance)
+        {
+            case 'insert': this.dispatch(Chater.actions.insert([id, {me, ...props}])) && me && this.dispatch(User.actions.counter(1)) && this.api.remove('chat.message'); break;
+            case 'edit': this.dispatch(Chater.actions.edit([id, {me, ...props}])) && me && this.dispatch(User.actions.clear()) && this.api.remove('chat.message'); break;
+            case 'delete': this.dispatch(Chater.actions.delete(id)) && me && this.dispatch(User.actions.counter(-1)) && this.dispatch(User.actions.clear()) && this.api.remove('chat.delete'); break;
+        }
+    }
 
     social(instance, uid, id, ...props)
     {

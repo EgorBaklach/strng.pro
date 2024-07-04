@@ -25,9 +25,12 @@ const LightboxComponent = connect(state => state.Imager)(({list, index, dispatch
     const pictures = Object.values(list); return pictures.length ? <Lightbox plugins={[Zoom]} render={{buttonZoom: () => null}} open={index >= 0} slides={pictures} close={() => dispatch(Imager.actions.close())} index={index}/> : null
 });
 
-const GridGallery = (props) =>
+const GridGallery = ({children}) =>
 {
-    const ref = useRef(null), onRender = new Delayer(() => {Renderer.onScroll.call(); (list => {list.add('complite'); list.remove('loading-after')})(ref.current?._containerRef.current.classList)}, 150);
+    const ref = useRef(null), onRender = new Delayer(() =>
+    {
+        const classList = ref.current._containerRef.current.classList; classList.add('complite'); classList.remove('loading-after'); Renderer.onScroll.call();
+    }, 150);
 
     return <JustifiedGrid
         className="justified-gallery loading-after"
@@ -36,8 +39,8 @@ const GridGallery = (props) =>
         ref={ref}
         columnRange={[2,3]}
         isCroppedSize={true}
-        onRenderComplete={event => onRender.call(event)}>
-        {props.children}
+        onRenderComplete={event => ref.current?._containerRef && onRender.call(event)}>
+        {children}
     </JustifiedGrid>;
 }
 
@@ -77,7 +80,7 @@ export default connect(state => state.Mobiler, {dispatch: action => dispatch => 
             <ShowDetail className="detail-btn"/>
             <Link to="/" className="mobile-home-icon"></Link>
             <div className="chat-icon" onClick={() => document.body.classList.toggle('chat-active')}></div>
-            <Wrapper component="div" className="detail">
+            <Wrapper component="div" className="detail" role="album">
                 <div className="breadcrumbs" ref={useRef(null)} key="breadcrumbs">
                     <ul>
                         <li><Link to="/" title="Главная">Главная</Link></li>

@@ -8,8 +8,8 @@ export default new class extends Parent
     {
         if(this.async[operation]) throw {abort: true, in_process: true, message: 'In process'}; this.async[operation] = true;
 
-        const response = await new Promise(r => setTimeout(() => r(fetch(location.origin + path, {method, body, headers: this.headers}).then(r => r.json())), 250));
+        const response = await new Promise(r => setTimeout(() => r(fetch(location.origin + path, {method, body, headers: this.headers})), 250)), raw = await response.json();
 
-        if(method === 'POST' && !response?.success) throw response?.abort ?? {abort: true, message: 'Internal Error'}; return response;
+        if(!response.ok) throw raw?.abort ? raw : {abort: true, message: 'Internal Error'}; return raw;
     }
 }

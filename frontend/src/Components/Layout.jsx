@@ -1,19 +1,16 @@
 import {Link, NavLink} from "react-router-dom";
-import {connect} from "react-redux";
 import {Fragment} from "react";
 
-import ScrollbarConnect from "./ScrollbarConnect.jsx";
+import Wrapper from "./Wrapper.jsx";
 
 const NavItem = ({article, i, limit}) => <li className={i >= limit ? 'mobile-visible' : ''}><NavLink to={'/blog/' + article.slug + '/'}>{article.name}</NavLink></li>
 
 const Navigation = ({articles, children}) => <nav className="menu" role="navigation">{articles && children}</nav>;
 
-const ClientComponent = ({children}) => !import.meta.env.SSR && <Fragment>{children}</Fragment>;
-
-export default connect()(({children, articles}) =>
+export default ({children, articles}) =>
     <Fragment>
         <aside key="complementary" role="complementary" className="header">
-            <ScrollbarConnect component="header" role="header">
+            <Wrapper component="header" role="header">
                 <section className="header-fields">
                 <Link to="/" className="logo"></Link>
                     <Navigation articles={articles}>
@@ -47,18 +44,8 @@ export default connect()(({children, articles}) =>
                         </ul>
                     </div>
                 </section>
-            </ScrollbarConnect>
+            </Wrapper>
             <div className="header-mobile-hamburger" onClick={() => document.body.classList.toggle('header-mobile-open')}><span/></div>
         </aside>
         {children}
-        <ClientComponent>
-            <section className="chat">
-                <ScrollbarConnect component="div" role="chat" className="chat-fields">
-                    <div className="messages">
-
-                    </div>
-                </ScrollbarConnect>
-                <div className="user-form"></div>
-            </section>
-        </ClientComponent>
-    </Fragment>);
+    </Fragment>;

@@ -7,7 +7,7 @@ export default {
 
         api.request(instance, 'POST', '/blog/' + id + '/' + instance + '/update/index.json', JSON.stringify({value}))
             .then(({uid}) => Renderer.socket.emit('call', ['social', instance, uid, id, count, value]))
-            .catch(e => !e?.in_process && api.remove(instance) && stream.remove(instance + id))
+            .catch(e => Renderer.catch(e, instance) && stream.remove(instance + id))
 
         return true;
     }

@@ -1,6 +1,6 @@
 <?php
 
-use App\Controllers\{Get, Main, Update};
+use App\Controllers\{Get, Main, Post};
 use App\Middlewares\{CloseDBConnectionMiddleware, CredentialsMiddleware, ProfilerMiddleware};
 use Framework\Routers\LeagueRouter;
 use Psr\Container\ContainerInterface;
@@ -27,6 +27,12 @@ $router->get('/about/stock/index.json', [Main::class, 'stock']);
 
 $router->get('/stats/index.json', [Get::class, 'social']);
 
+$router->get('/chat/messages/index.json', [Get::class, 'chat']);
+
+$router->get('/me/index.json', [Get::class, 'user']);
+
 ////////////// POST
 
-$router->post('/blog/{id}/{table}/update/index.json', [Update::class, 'social']);
+$router->post('/blog/{id}/{table}/update/index.json', [Post::class, 'social']);
+
+$router->post('/chat/{operation}/index.json', [Post::class, 'chat']);

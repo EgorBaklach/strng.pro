@@ -14,13 +14,9 @@ export default createSlice({
         {
             state.action = payload;
         },
-        list: (state, {payload}) =>
+        list: (state, {payload: [list, check]}) =>
         {
-            const [list, check] = payload, currentState = current(state);
-
-            if(check) for(const value of Object.keys(list)) if(currentState.counter[value]) return;
-
-            state.list = {...currentState.list, ...list};
+            const currentState = current(state); if(check) for(const value of Object.keys(list)) if(currentState.counter[value]) return; state.list = {...currentState.list, ...list};
         },
         add: (state, {payload}) =>
         {

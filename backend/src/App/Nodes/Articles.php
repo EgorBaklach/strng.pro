@@ -1,5 +1,6 @@
 <?php namespace App\Nodes;
 
+use App\Helpers\Convert;
 use Contracts\Cache\RememberInterface;
 use Magistrale\Databases\ORMStrng;
 use PDOStatement;
@@ -19,16 +20,9 @@ class Articles
     /** @var array */
     private $result;
 
-    private const months = [1 => 'Января', 2 => 'Февраля', 3 => 'Марта', 4 => 'Апреля', 5 => 'Мая', 6 => 'Июня', 7 => 'Июля', 8 => 'Августа', 9 => 'Сентября', 10 => 'Октября', 11 => 'Ноября', 12 => 'Декабря'];
-
     public function __construct(ORMStrng $strng, RememberInterface $cache)
     {
         $this->strng = $strng; $this->cache = $cache;
-    }
-
-    private function month($matches): string
-    {
-        [$match, $replace] = $matches; return self::months[$replace];
     }
 
     public function gallery(): ?array
@@ -57,7 +51,7 @@ class Articles
                     }
                 }
 
-                $article['date'] = preg_replace_callback('/#(.*)#/i', [$this, 'month'], date('j \#n\# Y', strtotime($article['date_update'] ?: $article['date_insert'])));
+                $article['date'] = Convert::month($article['date_update'] ?: $article['date_insert']);
 
                 $article['props'] = json_decode($article['props'], true, 512, JSON_BIGINT_AS_STRING);
 

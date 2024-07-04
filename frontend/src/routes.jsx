@@ -1,5 +1,5 @@
 import {useLoaderData, Outlet, useOutletContext} from "react-router-dom";
-import {createElement, useEffect, useRef, useState} from "react";
+import {createElement, Fragment, useEffect, useRef, useState} from "react";
 import {jsx, jsxs} from "react/jsx-runtime";
 import {connect} from "react-redux";
 
@@ -12,6 +12,7 @@ import Gallery from "./Pages/Gallery.jsx";
 import Album from "./Pages/Album.jsx";
 import Tag from "./Pages/Tag.jsx";
 
+import ChatConnect from "./Components/Chat.jsx";
 import Stub from "./Components/Stub.jsx";
 
 import Stream from "./Actions/Stream.jsx";
@@ -56,7 +57,7 @@ export default [
         shouldRevalidate: (url) => url.currentUrl.pathname !== url.nextUrl.pathname,
         Component: connect(null, {dispatch: action => dispatch => dispatch(action), ...Api, ...Stream})(props =>
         {
-            useEffect(() => Renderer.start(props), []); return <Outlet context={useLoaderData()}/>
+            useEffect(() => Renderer.start(props), []); return <Fragment><Outlet context={useLoaderData()}/>{!import.meta.env.SSR && <section className="chat"><ChatConnect/></section>}</Fragment>
         }),
         children: [
             {index: true, Component: ComponentConnected(() => Index)},

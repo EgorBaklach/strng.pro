@@ -20,10 +20,9 @@ export default createSlice({
         {
             delete state.messages[payload];
         },
-        edit: (state, {payload: [id, message]}) =>
+        edit: (state, {payload: [id, {name, text}]}) =>
         {
-            state.messages[id]['name'] = message.name;
-            state.messages[id]['text'] = message.text;
+            state.messages[id]['name'] = name; state.messages[id]['text'] = text;
         }
     },
 });

@@ -1,7 +1,6 @@
 <?php namespace App\Controllers;
 
 use ErrorException;
-use Helpers\Log;
 
 class Post extends ApiAbstract
 {
@@ -36,7 +35,7 @@ class Post extends ApiAbstract
         {
             case 'message':
 
-                [$name, $text, $id] = json_decode(file_get_contents('php://input'), true, 512, JSON_BIGINT_AS_STRING); [$day, $time] = explode(' ', $date = date('Y-m-d H:i:s')); Log::add2log($id);
+                [$name, $text, $id] = json_decode(file_get_contents('php://input'), true, 512, JSON_BIGINT_AS_STRING); [$day, $time] = explode(' ', $date = date('Y-m-d H:i:s'));
 
                 $this->strng->table('users')->insert(['uid' => $this->uid, 'name' => $name])->onDuplicate(['name' => 'values(name)'] + (!$id ? ['counter' => 'counter + 1'] : []))->exec();
 
@@ -50,11 +49,7 @@ class Post extends ApiAbstract
 
                 if(!$table->where(['uid=' => $this->uid, 'id=' => $id = file_get_contents('php://input') * 1])->delete()->exec()->rowCount()) throw new ErrorException('Internal Error');
 
-                $this->strng->table('users')->where(['uid=' => $this->uid])->update(['counter=counter - 1'])->exec();
-
-                $result = compact('id');
-
-                break;
+                $this->strng->table('users')->where(['uid=' => $this->uid])->update(['counter=counter - 1'])->exec(); $result = compact('id'); break;
         }
 
         return ['success' => true, 'uid' => $this->uid] + $result;

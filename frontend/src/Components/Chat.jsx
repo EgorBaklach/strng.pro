@@ -37,8 +37,7 @@ const ChatFormConnect = connect(States => States.User, {dispatch: action => disp
 {
     const [[name, text, message], setData] = useState(['', '', '']), ref = useRef(null), onKeyDown = e => e.altKey && e.keyCode === 13 && ref.current.querySelector('[type="submit"]').click();
 
-    useEffect(() => {user.mid && setData([user.name, user.text, 'Редактировать сообщение'])}, [user.mid]);
-    useEffect(() => {loaded && setData([user.name ?? name, text, message])}, [loaded]);
+    useEffect(() => {loaded && setData([user.name ?? name, user.text ?? text, user.mid ? 'Редактировать сообщение' : '']); user.mid && ref.current.querySelector('.textarea').focus()}, [loaded, user.mid]);
 
     const onSubmit = e =>
     {
@@ -57,12 +56,12 @@ const ChatFormConnect = connect(States => States.User, {dispatch: action => disp
             case n.length > 30: return setData([n, t, 'Имя > 30 символов']);
             case (/[^a-zA-Z\u0430-\u044f\s]+/gi).test(n): return setData([n, t, 'Имя содержит только буквы']);
             case t.length > 1000: return setData([n, t, 'Текст > 1000 символов']);
-            case user.name === name && user.text === text: return dispatch(User.actions.clear()) && setData([n, '', '']);
+            case user.name === name && user.text === text: return dispatch(User.actions.clear(user.mid)) && setData([n, '', '']);
         }
 
         request('chat.message', 'POST', '/chat/message/index.json', JSON.stringify([n, t, user.mid])).then(r =>
         {
-            Renderer.socket.emit('call', ['chat', user.mid ? 'edit' : 'insert', 'id:' + r.id, {...user, ...r}]); setData([n, '', '']);
+            Renderer.socket.emit('call', ['chat', user.mid ? 'edit' : 'insert', {...user, ...r}]); setData([n, '', '']);
         }).catch(e => Renderer.catch(e, 'chat.message') && setData([n, t, 'Internal Error']));
     };
 
@@ -80,7 +79,7 @@ export default connect(States => ({...States.Chater, ...States.Mobiler}), {...Ap
     const ref = useRef(null), delay = new Delayer(chatInit, 150); useEffect(() => {loaded && delay.call(ref.current.parentElement)}, [loaded, last_id, mobile]);
 
     const onDelete = id => confirm('Вы действительно хотите удалить сообщение?') && request('chat.delete', 'POST', '/chat/delete/index.json', id)
-        .then(props => Renderer.socket.emit('call', ['chat', 'delete', 'id:' + id, props]))
+        .then(props => Renderer.socket.emit('call', ['chat', 'delete', props]))
         .catch(e => Renderer.catch(e, 'chat.delete') && alert('Ошибка удаления сообщения'))
 
     return !loaded ? '' : <Fragment>

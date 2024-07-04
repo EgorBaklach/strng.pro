@@ -247,15 +247,15 @@ export default new class
     // LISTENERS //
     ///////////////
 
-    chat(instance, id, {uid, ...props})
+    chat(instance, {uid, id, ...props})
     {
         const me = uid === this.context.uid * 1;
 
         switch (instance)
         {
-            case 'insert': this.dispatch(Chater.actions.insert([id, {me, ...props}])) && me && this.dispatch(User.actions.counter(1)) && this.api.remove('chat.message'); break;
-            case 'edit': this.dispatch(Chater.actions.edit([id, {me, ...props}])) && me && this.dispatch(User.actions.clear()) && this.api.remove('chat.message'); break;
-            case 'delete': this.dispatch(Chater.actions.delete(id)) && me && this.dispatch(User.actions.counter(-1)) && this.dispatch(User.actions.clear()) && this.api.remove('chat.delete'); break;
+            case 'insert': this.dispatch(Chater.actions.insert(['id:' + id, {me, id, ...props}])) && me && this.dispatch(User.actions.counter(1)) && this.api.remove('chat.message'); break;
+            case 'edit': this.dispatch(Chater.actions.edit(['id:' + id, props])) && me && this.dispatch(User.actions.clear(id)) && this.api.remove('chat.message'); break;
+            case 'delete': this.dispatch(Chater.actions.delete('id:' + id)) && me && this.dispatch(User.actions.counter(-1)) && this.dispatch(User.actions.clear(id)) && this.api.remove('chat.delete'); break;
         }
     }
 

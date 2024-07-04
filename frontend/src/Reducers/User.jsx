@@ -19,9 +19,9 @@ export default createSlice({
         {
             state.user = {...current(state).user, mid: id, name, text};
         },
-        clear: state =>
+        clear: (state, {payload}) =>
         {
-            delete state.user.mid;
+            payload * 1 === state.user.mid * 1 && delete state.user.mid && delete state.user.name && delete state.user.text;
         }
     },
 });

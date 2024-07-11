@@ -40,7 +40,7 @@ export default connect(state => state.Mobiler)(({mobile, Context, dispatch}) =>
     useEffect(() => {dispatch(Loader.actions.action('sliderInit')); document.body.classList.add(...['gallery', !mobile && 'loading-after'].filter(v => v))}, [mobile, Context.url]);
 
     return <Layout articles={Context.articles}>
-        <Main role="main" className="wrapper" ref={useRef(null)}>
+        <Main role="gallery" className="wrapper" ref={useRef(null)}>
             <Link to="/" className="mobile-home-icon"></Link>
             <h1 className="page-title show-mobile">Фотографии</h1>
             <div className="chat-icon" onClick={() => document.body.classList.toggle('chat-active')}></div>

@@ -424,6 +424,7 @@ iframe{
 /* GRID GALLERY */
 
 .justified-gallery{
+    margin-bottom: 2.2vh;
     position: relative;
     overflow: hidden;
     height: 30vh;
@@ -431,9 +432,6 @@ iframe{
 }
     .justified-gallery.loading-after:after{
         position: absolute;
-    }
-    .justified-gallery + *{
-        padding-top: 2.2vh;
     }
     .justified-gallery .image{
         box-shadow: 0 2px 7px rgba(0, 0, 0, .3);

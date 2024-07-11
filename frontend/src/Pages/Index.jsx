@@ -6,7 +6,6 @@ import Renderer from "../Plugins/Renderer.jsx";
 
 import Layout from "../Components/Layout.jsx";
 import Wrapper from "../Components/Wrapper.jsx";
-import HorizontalWheel from "../Components/HorizontalWheel.jsx";
 import Main from "../Components/Main.jsx";
 import Social from "../Components/Social.jsx";
 
@@ -40,14 +39,14 @@ export default connect(state => state.Mobiler)(({Context, mobile}) =>
         <Wrapper component="main" reverse={Main} role="main" className="wrapper">
             <Link to="/" className="mobile-home-icon"></Link>
             <div className="chat-icon" onClick={() => document.body.classList.toggle('chat-active')}></div>
-            <HorizontalWheel className="main-grid">
+            <div className="main-grid">
                 {aids.map((slug, iterator) => <MainGridBox iterator={iterator} article={Context.articles[slug]} key={slug} hidden={iterator >= correctLength}/>)}
                 <div className="box copyrights">
                     <div className="wrapper">
                         <div className="date">© strng.pro {new Date().getFullYear()}</div>
                     </div>
                 </div>
-            </HorizontalWheel>
+            </div>
         </Wrapper>
     </Layout>;
 });

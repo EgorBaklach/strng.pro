@@ -20,20 +20,15 @@ class ErrorResponseHandler implements ErrorHandlerInterface
 
     public function __construct(Container $container)
     {
-        $this->articles = $container->get(Articles::class);
-        $this->statics = $container->get(Statics::class);
+        $this->articles = $container->get(Articles::class); $this->statics = $container->get(Statics::class);
     }
 
     public function handle(ServerRequestInterface $request, Throwable $error): ResponseInterface
     {
-        $status = $error instanceof HttpExceptionInterface ? $error->getStatusCode() : $error->getCode();
+        $status = $error instanceof HttpExceptionInterface ? $error->getStatusCode() : $error->getCode(); $status = in_array($status, [404, 405]) ? $status : 500;
 
-        $server = $request->getServerParams(); $cookies = $request->getCookieParams(); $address = $server['HTTP_X_REAL_IP'] ?: $server['REMOTE_ADDR'];
+        $server = $request->getServerParams(); $cookies = $request->getCookieParams(); $uid = $cookies['uid'] ?: ip2long($server['HTTP_X_REAL_IP'] ?: $server['REMOTE_ADDR']);
 
-        $data = $this->statics->get(in_array($status, [404, 405]) ? $status : 500)->require() + ['uid' => $cookies['uid']] + compact('address') + $this->articles->articles();
-
-        foreach($this->articles->stats($cookies['uid'] ?: ip2long($address)) as $field => $rs) while($v = $rs->fetch()) $data[$field][$v['aid']] = true;
-
-        return new JsonResponse($data, $status);
+        return new JsonResponse($this->statics->get($status)->require() + compact('uid') + $this->articles->setUid($uid * 1)->articles(), $status);
     }
 }

@@ -5,10 +5,6 @@ use Contracts\Cache\RememberInterface;
 use Magistrale\Databases\ORMStrng;
 use PDOStatement;
 
-/**
- * @method array articles(...$attibutes);
- * @method array tag(...$attibutes);
- */
 class Articles
 {
     /** @var ORMStrng */
@@ -20,9 +16,19 @@ class Articles
     /** @var array */
     private $result;
 
+    /** @var int */
+    private $uid;
+
+    const prefix = 'comments_';
+
     public function __construct(ORMStrng $strng, RememberInterface $cache)
     {
         $this->strng = $strng; $this->cache = $cache;
+    }
+
+    public function setUid(int $uid): self
+    {
+        $this->uid = $uid; return $this;
     }
 
     public function gallery(): ?array
@@ -33,13 +39,42 @@ class Articles
         });
     }
 
+    public function comments($id): ?array
+    {
+        if(!$table = $this->strng->get(self::prefix.$id)) return null; $values = null; $nid = 'id:0';
+
+        $rs = $table
+            ->dependence('users', 'LEFT', ['1:uid=' => '0:uid'])
+            ->order(['0:date' => 'DESC'])
+            ->limit(50)
+            ->select([
+                '0:id as id',
+                '0:uid as uid',
+                '0:date as date',
+                '1:name as name',
+                '1:role as role',
+                '0:text as text'
+            ])->exec();
+
+        while($message = $rs->fetch())
+        {
+            [$message['day'], $message['time']] = explode(' ', $message['date']);
+
+            if(array_key_exists($nid, $values) && $values[$nid]['day'] !== $message['day']) $values[$nid]['date_break'] = Convert::month($values[$nid]['day']);
+
+            if($this->uid === $message['uid'] * 1) $message['me'] = true; unset($message['uid']); $values[$nid = 'id:'.$message['id']] = $message;
+        }
+
+        if(count($values)) $values[$nid]['date_break'] = Convert::month($values[$nid]['day']); return array_reverse($values, true);
+    }
+
     public function __call($name, $arguments)
     {
-        if(!method_exists($this, $method = 'get'.ucfirst($name))) return null; $this->result = []; [$hash] = $arguments;
+        $this->result = []; [$hash] = $arguments;
 
-        return $this->cache->remember(implode('_', array_filter([$name, $hash])), 5, function() use ($method, $arguments)
+        return $this->cache->remember(implode('_', array_filter([$name, $hash])), 5, function() use ($name, $arguments)
         {
-            $rs = call_user_func([$this, $method], ...$arguments); $as = [];
+            $rs = call_user_func([$this, $name], ...$arguments); $as = [];
 
             while($article = $rs->fetch())
             {
@@ -51,7 +86,7 @@ class Articles
                     }
                 }
 
-                $article['date'] = Convert::month($article['date_update'] ?: $article['date_insert']);
+                $article['date'] = Convert::month(...explode(' ', $article['date_update'] ?: $article['date_insert']));
 
                 $article['props'] = json_decode($article['props'], true, 512, JSON_BIGINT_AS_STRING);
 
@@ -79,7 +114,7 @@ class Articles
         });
     }
 
-    private function getArticles(): PDOStatement
+    private function articles(): PDOStatement
     {
         return $this->strng->table('articles')
             ->where(['active=' => 'Y'])
@@ -89,11 +124,11 @@ class Articles
             ->exec();
     }
 
-    private function getTag(string $slug): PDOStatement
+    private function tag(string $slug): PDOStatement
     {
-        $tag = $this->strng->table('tags')->where(['slug=' => $slug])->select()->exec()->fetch();
+        $database = $this->strng; $tag = $database->table('tags')->where(['slug=' => $slug])->select()->exec()->fetch();
 
-        $rs = $this->strng->table('articles')
+        $rs = $database->table('articles')
             ->dependence('a2t', 'LEFT', ['0:id=' => '1:aid'])
             ->where(['0:active=' => 'Y', '1:tid=' => $tag['id']])
             ->order(['0:date_insert' => 'DESC'])

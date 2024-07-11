@@ -17,13 +17,8 @@ class Convert
         12 => 'Декабря'
     ];
 
-    static public function month(string $data): string
+    static public function month(string $day): string
     {
-        $convert = function($matches)
-        {
-            [$match, $replace] = $matches; return self::months[$replace];
-        };
-
-        return preg_replace_callback('/#(.*)#/i', $convert, date('j \#n\# Y', strtotime($data)));
+        [$y, $m, $d] = explode('-', $day); return implode(' ', [$d * 1, self::months[$m * 1], $y]);
     }
 }

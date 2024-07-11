@@ -5,7 +5,7 @@ export default createSlice({
     initialState: {
         loaded: false,
         last_id: false,
-        messages: {},
+        messages: {}
     },
     reducers: {
         init: (state, {payload}) =>
@@ -16,13 +16,12 @@ export default createSlice({
         {
             state.messages = {[id]: message, ...current(state).messages}; state.last_id = id;
         },
-        delete: (state, {payload}) =>
+        delete: (state, {payload: [id]}) =>
         {
-            delete state.messages[payload];
+            delete state.messages[id];
         },
         edit: (state, {payload: [id, {name, text}]}) =>
         {
             state.messages[id]['name'] = name; state.messages[id]['text'] = text;
         }
-    },
-});
+    }});

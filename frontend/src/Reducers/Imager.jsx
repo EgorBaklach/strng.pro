@@ -19,7 +19,7 @@ export default createSlice({
         {
             state.index = -1
         },
-        clean: (state) =>
+        clear: (state) =>
         {
             state.list = {}
         }

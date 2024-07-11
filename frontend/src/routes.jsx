@@ -1,5 +1,5 @@
 import {useLoaderData, Outlet, useOutletContext} from "react-router-dom";
-import {createElement, Fragment, useEffect, useRef, useState} from "react";
+import {createElement, Fragment, memo, useEffect, useRef, useState} from "react";
 import {jsx, jsxs} from "react/jsx-runtime";
 import {connect} from "react-redux";
 
@@ -12,11 +12,12 @@ import Gallery from "./Pages/Gallery.jsx";
 import Album from "./Pages/Album.jsx";
 import Tag from "./Pages/Tag.jsx";
 
-import ChatConnect from "./Components/Chat.jsx";
+import Chat from "./Components/Chat.jsx";
 import Stub from "./Components/Stub.jsx";
 
 import Stream from "./Actions/Stream.jsx";
 import Api from "./Actions/Api.jsx";
+import Comments from "./Reducers/Comments.jsx";
 
 const _jsx = (type, props, key) => jsx(type, {...props, ref: ['symbol', 'function'].includes(typeof type) ? null : useRef(null)}, key);
 
@@ -32,7 +33,6 @@ const catcher = url => render({
     content: "Вероятно пропал интернет. Ничего страшного! Немного подождите, затем [обновите страницу](" + url + ")\n\r© strng.pro " + new Date().getFullYear(),
     page_title: '503 SERVER ERROR',
     articles: Renderer.context?.articles ?? {},
-    address: Renderer.context?.address ?? null,
     uid: Renderer.context?.uid ?? null,
     url
 });
@@ -43,12 +43,19 @@ const render = async json => json.content ? {...json, content: await Renderer.ev
 
 const StubComponent = ({Context, ...props}) => <Stub {...props} Context={Context} chain={Context?.chain || Context.status} title={Context.page_title}/>;
 
-const ComponentConnected = Component => connect(state => state.Mobiler)(({mobile}) =>
+const Handler = Component => connect(state => state.Mobiler)(({mobile}) =>
 {
     const Context = useOutletContext(); Renderer.onAction.finish = false; Renderer.first = []; Renderer.last = [];
 
     useEffect(() => Renderer.build(Context), [mobile, Context.url]); return createElement(Context.status > 400 ? StubComponent : Component(Context), {Context})
 });
+
+const ArticleComponent = connect(state => state.Comments)(memo(({Context, aid, comments, counters, dispatch}) =>
+{
+    useEffect(() => {Context.id !== aid && dispatch(Comments.actions.init([Context.id, Context.comments]))}, [Context.id]);
+
+    return (Context.id === aid || import.meta.env.SSR) && <Article Context={Context} comments={comments} counters={counters}/>;
+}));
 
 export default [
     {
@@ -57,15 +64,15 @@ export default [
         shouldRevalidate: (url) => url.currentUrl.pathname !== url.nextUrl.pathname,
         Component: connect(null, {dispatch: action => dispatch => dispatch(action), ...Api, ...Stream})(props =>
         {
-            useEffect(() => Renderer.start(props), []); return <Fragment><Outlet context={useLoaderData()}/>{!import.meta.env.SSR && <section className="chat"><ChatConnect/></section>}</Fragment>
+            useEffect(() => Renderer.start(props), []);  return <Fragment><Outlet context={useLoaderData()}/>{!import.meta.env.SSR && <section className="chat"><Chat/></section>}</Fragment>
         }),
         children: [
-            {index: true, Component: ComponentConnected(() => Index)},
-            {path: 'blog/', Component: ComponentConnected(() => Blog)},
-            {path: 'blog/:slug', Component: ComponentConnected(Context => Context.props?.is_gallery ? Album : Article)},
-            {path: 'tag/:slug', Component: ComponentConnected(() => Tag)},
-            {path: 'gallery/', Component: ComponentConnected(() => Gallery)},
-            {path: '*', Component: ComponentConnected(() => StubComponent)}
+            {index: true, Component: Handler(() => Index)},
+            {path: 'blog/', Component: Handler(() => Blog)},
+            {path: 'blog/:slug', Component: Handler(Context => Context.props?.is_gallery ? Album : ArticleComponent)},
+            {path: 'tag/:slug', Component: Handler(() => Tag)},
+            {path: 'gallery/', Component: Handler(() => Gallery)},
+            {path: '*', Component: Handler(() => StubComponent)}
         ]
     }
 ]

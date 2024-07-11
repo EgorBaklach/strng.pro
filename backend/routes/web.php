@@ -1,6 +1,6 @@
 <?php
 
-use App\Controllers\{Get, Main, Post};
+use App\Controllers\{Get, Controller, Post};
 use App\Middlewares\{CloseDBConnectionMiddleware, CredentialsMiddleware, ProfilerMiddleware};
 use Framework\Routers\LeagueRouter;
 use Psr\Container\ContainerInterface;
@@ -14,16 +14,16 @@ $router->middleware($container->get(CloseDBConnectionMiddleware::class));
 
 ////////////// GET
 
-$router->get('/index.json', [Main::class, 'index']);
+$router->get('/index.json', [Controller::class, 'index']);
 
-$router->get('/blog/index.json', [Main::class, 'blog']);
-$router->get('/blog/{slug}/index.json', [Main::class, 'article']);
+$router->get('/blog/index.json', [Controller::class, 'blog']);
+$router->get('/blog/{slug}/index.json', [Controller::class, 'article']);
 
-$router->get('/gallery/index.json', [Main::class, 'gallery']);
-$router->get('/tag/{slug}/index.json', [Main::class, 'tag']);
+$router->get('/gallery/index.json', [Controller::class, 'gallery']);
+$router->get('/tag/{slug}/index.json', [Controller::class, 'tag']);
 
-$router->get('/about/index.json', [Main::class, 'about']);
-$router->get('/about/stock/index.json', [Main::class, 'stock']);
+$router->get('/about/index.json', [Controller::class, 'about']);
+$router->get('/about/stock/index.json', [Controller::class, 'stock']);
 
 $router->get('/stats/index.json', [Get::class, 'social']);
 
@@ -35,4 +35,4 @@ $router->get('/me/index.json', [Get::class, 'user']);
 
 $router->post('/blog/{id}/{table}/update/index.json', [Post::class, 'social']);
 
-$router->post('/chat/{operation}/index.json', [Post::class, 'chat']);
+$router->post('/{instance}/{operation}/index.json', [Post::class, 'dialog']);

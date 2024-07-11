@@ -13,9 +13,11 @@ export default createSlice({
         {
             state.visits = visits ?? {}; state.likes = likes ?? {}; state.loaded = true;
         },
-        insert: (state, {payload: [instance, self, id, count, value]}) =>
+        insert: (state, {payload: [instance, me, id, count, value]}) =>
         {
-            const currentState = current(state); instance !== 'comments' && self ? state[instance][id] = value > 0 : null;
+            const currentState = current(state); instance !== 'comments' && me ? state[instance][id] = value > 0 : null;
+
+            if(currentState.socials[id]?.[instance] > 0) count = currentState.socials[id][instance];
 
             state.socials[id] = {...currentState.socials[id] ?? {}, [instance]: count === 0 && value < 0 ? 0 : count + value};
         },

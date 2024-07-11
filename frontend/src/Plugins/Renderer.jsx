@@ -8,7 +8,9 @@ import $ from "jquery";
 
 import Delayer from "./Delayer.jsx"
 
+import Comments from "../Reducers/Comments.jsx";
 import Mobiler from "../Reducers/Mobiler.jsx";
+import Editor from "../Reducers/Editor.jsx";
 import Chater from "../Reducers/Chater.jsx";
 import Imager from "../Reducers/Imager.jsx";
 import Loader from "../Reducers/Loader.jsx";
@@ -48,7 +50,10 @@ export default new class
         this.stream = null;
         this.api = null;
 
+        this.scrollLeft = 0;
+
         this.scrollers = {};
+        this.comments = {};
         this.context = {};
         this.first = [];
         this.last = [];
@@ -87,17 +92,16 @@ export default new class
         this.as = null;
 
         this.scrollers = {};
+        this.comments = {};
         this.context = {};
 
-        this.dispatch(Imager.actions.clean());
+        this.dispatch(Imager.actions.clear());
         this.dispatch(Loader.actions.reset());
     }
 
     build(context)
     {
-        if(this.scrollers.main?._container.scrollTop) this.scrollers.main._container.scrollTop = 0; this.context = context;
-
-        !this.cookies.values?.uid && this.cookies.set('uid', this.context.uid, 365); return () => this.destroy();
+        this.context = context; !this.cookies.values?.uid && this.cookies.set('uid', this.context.uid, 365); return () => this.destroy();
     }
 
     /////////////////
@@ -121,28 +125,28 @@ export default new class
     // ON START //
     //////////////
 
-    resize()
-    {
-        this.vw = window.innerWidth * 0.01; this.vh = window.innerHeight * 0.01; this.dispatch(Mobiler.actions.update());
-
-        this.context?.props?.action === 'columnize' && window.innerWidth >= 768 && setTimeout(() => this.onAction.finish && this.columnize(), 100);
-
-        document.documentElement.style.setProperty('--vw', this.vw + 'px');
-        document.documentElement.style.setProperty('--vh', this.vh + 'px');
-    }
-
     catch(error, instance)
     {
         !error?.in_process && this.api.remove(instance); return true;
     }
 
+    resize()
+    {
+        this.vw = window.innerWidth * 0.01; this.vh = window.innerHeight * 0.01; this.dispatch(Mobiler.actions.update());
+
+        this.context?.props?.action === 'columnize' && window.innerWidth >= 768 && setTimeout(() => this.onAction.finish && this.columnize(), 1);
+
+        document.documentElement.style.setProperty('--vw', this.vw + 'px');
+        document.documentElement.style.setProperty('--vh', this.vh + 'px');
+    }
+
     start({dispatch, request, remove, subscribe, clear})
     {
-        this.dispatch = dispatch; this.api = {request, remove}; this.stream = {subscribe, clear}; document.querySelector("root").removeAttribute('data-ssr'); window.addEventListener('resize', () => this.onResize.call());
-
-        $(document).on('click', '.js-gallery-image', e => dispatch(Imager.actions.open(e.currentTarget.getAttribute('data-index'))) && false);
+        this.dispatch = dispatch; this.api = {request, remove}; this.stream = {subscribe, clear}; document.querySelector("root").removeAttribute('data-ssr');
 
         document.fonts.onloadingdone = e => e.fontfaces.map(font => dispatch(Loader.actions.load(font.family.replace(/"/g, ''))) && dispatch(Loader.actions.check()));
+
+        $(document).on('click', '.js-gallery-image', e => dispatch(Imager.actions.open(e.currentTarget.getAttribute('data-index'))) && false);
 
         request('chat.messages', 'GET', '/chat/messages/index.json').then(r => dispatch(Chater.actions.init(r)) && remove('chat.messages')).catch(r => this.catch(r, 'chat.messages'));
         request('socials', 'GET', '/stats/index.json').then(r => dispatch(Socier.actions.init(r)) && remove('socials')).catch(r => this.catch(r, 'socials'));
@@ -153,6 +157,8 @@ export default new class
 
         this.socket.on('answer', props => this[props.shift()](...props));
 
+        window.addEventListener('resize', () => this.onResize.call());
+
         return () => this.socket.off('answer');
     }
 
@@ -162,44 +168,60 @@ export default new class
 
     continue()
     {
+        this.container.scrollLeft >= this.width ? this.rb.ref.current.classList.remove('active') : this.rb.ref.current.classList.add('active');
         this.container.scrollLeft > 0 ? this.lb.ref.current.classList.add('active') : this.lb.ref.current.classList.remove('active');
 
-        this.page >= this.pages && this.container.scrollLeft >= this.width ? this.rb.ref.current.classList.remove('active') : this.rb.ref.current.classList.add('active');
+        this.comments.on = this.async = false;
 
-        this.async = false;
+        if(this.page >= this.comments.page || this.container.scrollLeft >= this.width)
+        {
+            if(this.comments.reload)
+            {
+                document.body.classList.add('loading-after'); this.setChildrens([...this.first, ...this.childrens, ...this.last]); setTimeout(() => this.columnize(this.scrollLeft), 1);
+            }
+
+            this.comments.on = true; this.comments.reload = false;
+        }
     }
 
     wheel(distance)
     {
-        const module = document.body.classList.contains('chat-active') ? 1.25 : 11.125; this.page = Math.max(0, Math.floor((distance + (this.vw * module))/ (this.vw * 58.5))); this.continue();
+        this.page = Math.max(0, Math.floor((distance + (this.vw * (document.body.classList.contains('chat-active') ? 1.25 : 11.125))) / (this.vw * 58.5))); this.scrollLeft = distance; this.continue();
     }
 
-    turn(event, check)
+    turn(check)
     {
-        if(this.async || this.pages < 0) return; this.async = true; const module = document.body.classList.contains('chat-active') ? 1.25 : 11.125;
+        if(this.async || this.pages < 0) return; this.async = true; const indent = document.body.classList.contains('chat-active') ? 1.25 : 11.125;
 
-        check ? this.page++ : this.container.scrollLeft <= Math.max(0, this.vw * (58.5 * this.page - module)) && this.page--;
+        const distance = Math.max(0, this.vw * (58.5 * (this.page + (check ? 1 : this.container.scrollLeft <= Math.max(0, this.vw * (this.page * 58.5 - indent)) && -1)) - indent));
 
-        this.as?.left(Math.max(0, this.vw * (58.5 * this.page - module))).then(() => this.continue());
+        this.as?.left(distance).then(() => setTimeout(() => this.wheel(distance), 50));
     }
 
     ////////////
     // RENDER //
     ////////////
 
-    columnize()
+    columnize(scrollLeft)
     {
-        if(window.innerWidth < 768) return true; let different = 0, list = [[]], innerHeight = window.innerHeight - window.innerWidth * 0.03; this.width = this.page = this.pages = 0;
+        if(window.innerWidth < 768) return true; let different = 0, indent = 0, list = [[]], innerHeight = window.innerHeight - window.innerWidth * 0.03; this.width = this.page = this.pages = 0;
 
         document.body.classList.remove('columnizer-active');
 
-        for(const child of this.childrens)
+        for(const child of [...this.first, ...this.childrens, ...this.last])
         {
-            if(!child.ref?.current) continue; const {y, bottom} = child.ref.current.getBoundingClientRect();
+            if(!child.ref?.current && !child.props?.['data-id']) continue;
 
-            if((bottom + different) >= innerHeight * (this.pages + 1))
+            const container = child.ref?.current ?? $('.js-message[data-id=' + child.props['data-id'] +']')[0], {y, bottom} = container.getBoundingClientRect();
+
+            if(container.getAttribute('role') === 'breakline')
             {
-                if(list[++this.pages] === undefined) list[this.pages] = []; different = innerHeight * this.pages - y;
+                if((y + different) > innerHeight * (this.pages + 1) - innerHeight / 2) indent = - (y + different - (innerHeight * (this.pages + 1))); this.comments = {page: this.pages, on: false};
+            }
+
+            if((bottom + different + indent) >= innerHeight * (this.pages + 1))
+            {
+                if(list[++this.pages] === undefined) list[this.pages] = []; different = innerHeight * this.pages - y - indent;
             }
 
             list[this.pages].push(child);
@@ -211,9 +233,9 @@ export default new class
 
         this.width = Math.max(0, Math.floor(this.vw * (58.5 * this.pages-- - 20)));
 
-        if(this.scrollers?.main)
+        if(this.scrollers?.article)
         {
-            this.as = new AnimatedScroll(this.container = this.scrollers.main._container); this.container.scrollLeft = 0;
+            this.as = new AnimatedScroll(this.container = this.scrollers.article._container); this.container.scrollLeft = scrollLeft ?? 0; setTimeout(() => this.wheel(scrollLeft ?? 0), 1);
         }
 
         this.init = true; return this.after();
@@ -234,11 +256,19 @@ export default new class
         return !Object.entries(state.list).filter(values => !values.pop()).length ? this[state.action ?? 'after']() : false;
     }
 
+    rerender()
+    {
+        if(this.context?.props?.action === 'columnize' && window.innerWidth >= 768)
+        {
+            this.comments.reload = true; if(!this.comments.on) return; this.comments.reload = false; document.body.classList.add('loading-after'); setTimeout(() => this.columnize(this.scrollLeft), 1);
+        }
+
+        this.setChildrens([...this.first, ...this.childrens, ...this.last]);
+    }
+
     render(childrens, setChildrens)
     {
-        this.childrens = [...this.first, ...childrens, ...this.last]; this.setChildrens = setChildrens;
-
-        if(this.first.length || this.last.length) setChildrens(this.childrens);
+        this.childrens = childrens; this.setChildrens = setChildrens; if(this.first.length || this.last.length) setChildrens([...this.first, ...this.childrens, ...this.last]);
 
         this.context?.page === 'article' && this.dispatch(Loader.actions.check()); return true;
     }
@@ -247,16 +277,18 @@ export default new class
     // LISTENERS //
     ///////////////
 
-    chat(instance, {uid, id, ...props})
+    dialog(instance, operation, {uid, id, aid, count, ...props})
     {
-        const me = uid === this.context.uid * 1;
+        const me = uid === this.context.uid * 1, actions = {chat: Chater.actions, comments: Comments.actions}; let value = null;
 
-        switch (instance)
+        switch (operation)
         {
-            case 'insert': this.dispatch(Chater.actions.insert(['id:' + id, {me, id, ...props}])) && me && this.dispatch(User.actions.counter(1)) && this.api.remove('chat.message'); break;
-            case 'edit': this.dispatch(Chater.actions.edit(['id:' + id, props])) && me && this.dispatch(User.actions.clear(id)) && this.api.remove('chat.message'); break;
-            case 'delete': this.dispatch(Chater.actions.delete('id:' + id)) && me && this.dispatch(User.actions.counter(-1)) && this.dispatch(User.actions.clear(id)) && this.api.remove('chat.delete'); break;
+            case 'insert': value = 1; this.dispatch(actions[instance].insert(['id:' + id, {me, id, aid, ...props}])) && me && this.dispatch(User.actions.counter(1)) && this.api.remove('dialog.message'); break;
+            case 'edit': this.dispatch(actions[instance].edit(['id:' + id, {aid, ...props}])) && me && this.dispatch(Editor.actions.clear([instance, id * 1])) && this.api.remove('dialog.message'); break;
+            case 'delete': value = -1; this.dispatch(actions[instance].delete(['id:' + id, aid])) && me && this.dispatch(User.actions.counter(-1)) && this.dispatch(Editor.actions.clear([instance, id * 1])) && this.api.remove('dialog.delete'); break;
         }
+
+        if(instance === 'comments' && value !== null) this.social('comments', uid, aid, count, value); this.onScroll.call();
     }
 
     social(instance, uid, id, ...props)

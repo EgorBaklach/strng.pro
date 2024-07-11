@@ -1,57 +1,68 @@
 <?php namespace App\Controllers;
 
+use App\Nodes\Articles;
 use ErrorException;
+use Molecule\ORM;
 
-class Post extends ApiAbstract
+class Post extends ControllerAbstract
 {
     /** @throws ErrorException */
-    protected function social($attibutes): array
+    protected function social($uid, $attibutes): array
     {
-        $table = $this->strng->table($attibutes['table']); $post = json_decode(file_get_contents('php://input'), true, 512, JSON_BIGINT_AS_STRING); $value = $post['value'];
+        $table = $this->strng->table($attibutes['table']); $value = json_decode(file_get_contents('php://input'), true, 512, JSON_BIGINT_AS_STRING) * 1;
 
         switch(true)
         {
-            case $this->uid < 0 || $this->uid > 4294967295: throw new ErrorException('UID is Not Corrected');
+            case $uid < 0 || $uid > 4294967295: throw new ErrorException('UID is Not Corrected');
             case !in_array($value, [-1, 1]) || ($value === -1 && $attibutes['table'] === 'visits'): throw new ErrorException('Value is Not Corrected');
         }
 
         switch($value)
         {
-            case 1: $table->insert(['aid' => $attibutes['id'], 'uid' => $this->uid])->exec(); break;
-            case -1: if(!$table->where(['aid=' => $attibutes['id'], 'uid=' => $this->uid])->delete()->exec()->rowCount()) throw new ErrorException('User dont have values yet'); break;
+            case 1: $table->insert(['aid' => $attibutes['id']] + compact('uid'))->exec(); break;
+            case -1: if(!$table->where(['aid=' => $attibutes['id'], 'uid=' => $uid])->delete()->exec()->rowCount()) throw new ErrorException('User dont have values yet'); break;
         }
 
         $this->strng->table('articles')->where(['id=' => $attibutes['id']])->update(['cnt_'.$attibutes['table'].'=cnt_'.$attibutes['table'].'+'.$value])->exec();
 
-        return ['success' => true, 'uid' => $this->uid];
+        return ['success' => true] + compact('uid');
+    }
+
+    private function table(string $name): ?ORM
+    {
+        return $this->strng->get($name) ?? $this->strng->set($name);
     }
 
     /** @throws ErrorException */
-    protected function chat($attributes): array
+    protected function dialog($uid, $attributes): array
     {
-        $table = $this->strng->table('chat'); $result = [];
+        $result = compact('uid'); $post = json_decode(file_get_contents('php://input'), true, 512, JSON_BIGINT_AS_STRING); $aid = array_pop($post); $value = null;
+
+        $table = $this->table($attributes['instance'] === 'comments' ? Articles::prefix.$aid : $attributes['instance']);
 
         switch($attributes['operation'])
         {
             case 'message':
 
-                [$name, $text, $id] = json_decode(file_get_contents('php://input'), true, 512, JSON_BIGINT_AS_STRING); [$day, $time] = explode(' ', $date = date('Y-m-d H:i:s'));
+                [$name, $text, $id] = $post; [$day, $time] = explode(' ', $date = date('Y-m-d H:i:s')); if(!$id) $value = 1;
 
-                $this->strng->table('users')->insert(['uid' => $this->uid, 'name' => $name])->onDuplicate(['name' => 'values(name)'] + (!$id ? ['counter' => 'counter + 1'] : []))->exec();
+                $this->strng->table('users')->insert(compact('uid', 'name'))->onDuplicate(['name' => 'values(name)'] + (!$id ? ['counter' => 'counter + 1'] : []))->exec();
 
-                $table->insert(['uid' => $this->uid] + compact('id', 'date', 'text'))->onDuplicate(['text' => 'values(text)'])->exec();
+                $table->insert(compact('uid', 'id', 'date', 'text'))->onDuplicate(['text' => 'values(text)'])->exec();
 
-                $result = ['id' => $id ?? $table->connection()->lastInsertId()] + compact('date', 'name', 'text', 'day', 'time');
+                $result += ['id' => $id ?? $table->connection()->lastInsertId()] + compact('date', 'name', 'text', 'day', 'time');
 
                 break;
 
             case 'delete':
 
-                if(!$table->where(['uid=' => $this->uid, 'id=' => $id = file_get_contents('php://input') * 1])->delete()->exec()->rowCount()) throw new ErrorException('Internal Error');
+                if(!$table->where(['uid=' => $uid, 'id=' => $id = array_shift($post) * 1])->delete()->exec()->rowCount()) throw new ErrorException('Internal Error');
 
-                $this->strng->table('users')->where(['uid=' => $this->uid])->update(['counter=counter - 1'])->exec(); $result = compact('id'); break;
+                $this->strng->table('users')->where(['uid=' => $uid])->update(['counter=counter - 1'])->exec(); $value = -1; $result += compact('id'); break;
         }
 
-        return ['success' => true, 'uid' => $this->uid] + $result;
+        if($attributes['instance'] === 'comments' && $value !== null) $this->strng->table('articles')->where(['id=' => $aid])->update(['cnt_comments=cnt_comments+'.$value])->exec();
+
+        return ['success' => true] + $result;
     }
 }

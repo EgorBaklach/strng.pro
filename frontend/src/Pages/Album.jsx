@@ -2,23 +2,27 @@ import Lightbox from "yet-another-react-lightbox";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import {JustifiedGrid} from "@egjs/react-grid";
 import {Link} from "react-router-dom";
-import {useEffect, useRef, useState} from "react";
+import {Fragment, useEffect, useRef, useState} from "react";
 import {connect} from "react-redux";
 
 import Delayer from "../Plugins/Delayer.jsx";
 import Renderer from "../Plugins/Renderer.jsx";
 
+import UserForm from "../Components/UserForm.jsx";
+import Message from "../Components/Message.jsx";
 import Wrapper from "../Components/Wrapper.jsx";
 import Layout from "../Components/Layout.jsx";
 import Slider from "../Components/Slider.jsx";
 import Main from "../Components/Main.jsx";
 import Tags from "../Components/Tags.jsx";
 
+import Comments from "../Reducers/Comments.jsx";
 import Imager from "../Reducers/Imager.jsx";
 import Loader from "../Reducers/Loader.jsx";
 
 import Stream from "../Actions/Stream.jsx";
 import Social from "../Actions/Social.jsx";
+import Dialog from "../Actions/Dialog.jsx";
 
 const LightboxComponent = connect(state => state.Imager)(({list, index, dispatch}) =>
 {
@@ -44,6 +48,21 @@ const GridGallery = ({children}) =>
     </JustifiedGrid>;
 }
 
+const CommentsComponent = connect(state => state.Comments, {dispatch: action => dispatch => dispatch(action), ...Dialog})(({Context, aid, comments, dispatch, counters, onEdit, onDelete}) =>
+{
+    useEffect(() => {Context.id !== aid && dispatch(Comments.actions.init([Context.id, Context.comments]))}, [Context.id]);
+
+    useEffect(() => {counters?.insert && Renderer.scrollers?.album?._container.scrollTo(0, 999999)}, [counters?.insert]);
+
+    return Context.id === aid && <div className="comments"><h2 className="comments-title" key="comments-title">Комментарии</h2>
+        {Object.entries(comments).map(([id, message]) => <div key={id} className="message">
+            {message?.date_break && <div className="message-break"><span>{message.date_break}</span></div>}
+            <Message message={message} onEdit={() => {Renderer.scrollers?.album?._container.scrollTo(0, 999999); onEdit(message)}} onDelete={() => onDelete([message.id, Context.id, Context.cnt_comments])}/>
+        </div>)}
+        <div className="user-form" key="user-form" ><UserForm instance="comments" aid={Context.id} count={Context.cnt_comments}/></div>
+    </div>
+});
+
 export default connect(state => state.Mobiler, {dispatch: action => dispatch => dispatch(action), ...Stream})(({mobile, Context, dispatch, subscribe}) =>
 {
     const Content = Context.content.default; useEffect(() => {subscribe('visits' + Context.id, props => Social.update('visits', Context.id, Context.cnt_visits, 1, ...props))}, [Context.url]);
@@ -66,13 +85,15 @@ export default connect(state => state.Mobiler, {dispatch: action => dispatch => 
         return <button onClick={click} className={className}>{visibility[1]}</button>;
     }
 
-    const TagsContrainer = ({check, className}) => check && <Tags article={Context} ref={useRef(null)} key="tags" className={className}><li>{"© strng.pro " + new Date().getFullYear()}</li></Tags>;
+    const Footer = ({Context}) => <Fragment>
+        <Tags article={Context} ref={useRef(null)} key="tags" className="article-tags"><li>{"© strng.pro " + new Date().getFullYear()}</li></Tags>
+        {!import.meta.env.SSR && <CommentsComponent Context={Context} type="comments"/>}
+    </Fragment>;
 
     useEffect(() =>
     {
         dispatch(Loader.actions.action('sliderInit')); document.body.classList.add(...['article-page', 'gallery', !mobile && 'loading-after'].filter(v => v));
-
-        return () => dispatch(Imager.actions.clean()) && dispatch(Imager.actions.close())
+        return () => dispatch(Imager.actions.clear()) && dispatch(Imager.actions.close())
     }, [mobile, Context.url]);
 
     return <Layout articles={Context.articles}>
@@ -90,12 +111,12 @@ export default connect(state => state.Mobiler, {dispatch: action => dispatch => 
                 </div>
                 <h1 className="page-title">{Context.name}</h1>
                 <Content/>
-                <TagsContrainer check={!mobile} className="article-tags"/>
+                {!mobile && <Footer Context={Context}/>}
             </Wrapper>
             <Slider component={GridGallery} url={Context.url} key={'album-' + Context.id}>
                 {Object.keys(Context.pictures).map((id, iteration) => <Picture iteration={iteration} id={id} key={id}/>)}
             </Slider>
-            <TagsContrainer check={mobile} className="article-tags tags-bottom"/>
+            {mobile && <Footer Context={Context}/>}
         </Main>
         <LightboxComponent type="lightbox"/>
     </Layout>;

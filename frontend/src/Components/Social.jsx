@@ -5,17 +5,20 @@ import Stream from "../Actions/Stream.jsx";
 import Social from "../Actions/Social.jsx";
 
 const elSocials = {
-    likes: connect(null, Stream)(({id, active, className, children, subscribe}) =>
-        <li className={className + active} onClick={e => {e.preventDefault(); subscribe('likes' + id, props => Social.update('likes', id, children, active.length ? -1 : 1, ...props))}}>{children}</li>
-    ),
-    default: ({className, children}) => <li className={className}>{children}</li>
+    likes: connect(null, Stream)(({id, active, className, children, loaded, subscribe}) => {
+        return createElement('li', {
+            className: className + active,
+            ...(loaded && {onClick: e => {e.preventDefault(); subscribe('likes' + id, props => Social.update('likes', id, children, active.length ? -1 : 1, ...props))}})
+        }, children);
+    }),
+    default: memo(({className, children}) => <li className={className}>{children}</li>, (p, n) => p.children === n.children)
 };
 
-export default connect(state => state.Socier)(memo(({id, social, loaded, socials, likes}) =>
-{
-    return !loaded ? '' : <div className="social">
+export default connect(state => state.Socier)(memo(({id, social, loaded, socials, likes}) => {
+    return <div className="social">
         <ul>{Object.entries(social).map(([k, v]) => createElement(elSocials[k] ?? elSocials.default, {
             id,
+            loaded,
             key: id + '-' + k,
             className: k,
             active: likes[id] ? ' active' : ''

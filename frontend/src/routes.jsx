@@ -60,11 +60,12 @@ const ArticleComponent = connect(state => state.Comments)(memo(({Context, aid, c
 export default [
     {
         path: "/",
-        loader: ({request: {url, headers}}) => fetch((url => url.origin + url.pathname + 'index.json' + url.search)(new URL(url)), init(headers)).then(resolve => resolve.json().then(json => render({...json, url}))).catch(() => catcher(url)),
+        loader: ({request: {url, headers}}) => fetch((url => url.origin + url.pathname + 'index.json' + url.search)(new URL(url)), init(headers))
+            .then(resolve => resolve.json().then(json => render({...json, url}))).catch(() => catcher(url)),
         shouldRevalidate: (url) => url.currentUrl.pathname !== url.nextUrl.pathname,
         Component: connect(null, {dispatch: action => dispatch => dispatch(action), ...Api, ...Stream})(props =>
         {
-            useEffect(() => Renderer.start(props), []);  return <Fragment><Outlet context={useLoaderData()}/>{!import.meta.env.SSR && <section className="chat"><Chat/></section>}</Fragment>
+            useEffect(() => Renderer.start(props), []); return <Fragment><Outlet context={useLoaderData()}/>{!import.meta.env.SSR && <section className="chat"><Chat/></section>}</Fragment>
         }),
         children: [
             {index: true, Component: Handler(() => Index)},

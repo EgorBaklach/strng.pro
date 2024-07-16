@@ -267,13 +267,13 @@ aside{
                         content: "\f189";
                     }
                     header .social .vk a:hover{
-                        color: #2a5885;
+                        color: #4C75A3;
                     }
-                    header .social .inst a:after{
-                        content: "\f16d";
+                    header .social .tg a:after{
+                        content: "\f2c6";
                     }
-                    header .social .inst a:hover{
-                        color: #db2e72;
+                    header .social .tg a:hover{
+                        color: #24A1DE;
                     }
                     header .social .yt a:after{
                         content: "\f167";
@@ -737,6 +737,7 @@ root > main{
     .gallery .article-tags{
         display: none;
     }
+    .gallery.images-ready .detail-btn,
     .gallery.images-ready .detail{
         display: block;
     }
@@ -776,7 +777,7 @@ root > main{
 
 .detail-btn{
     border: none;
-    display: block;
+    display: none;
     cursor: pointer;
     position: fixed;
     text-align: center;
@@ -1770,7 +1771,7 @@ button.arrow.right{
     /* DETAIL BTN */
 
     .detail-btn{
-        display: none;
+        display: none !important;
     }
     .article-page.detail-show root > main{
         margin: 0;

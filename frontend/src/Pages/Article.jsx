@@ -78,7 +78,7 @@ export default connect(state => state.Mobiler, {dispatch: action => dispatch => 
 {
     const Content = Context.content.default; useEffect(() => {subscribe('visits' + Context.id, props => Social.update('visits', Context.id, Context.cnt_visits, 1, ...props))}, [Context.url]);
 
-    useEffect(() => {Object.keys(counters).length && Renderer.rerender()}, [counters]);
+    useEffect(() => {Object.keys(counters).length && Renderer.rerender(counters)}, [counters]);
 
     useEffect(() =>
     {
@@ -110,7 +110,7 @@ export default connect(state => state.Mobiler, {dispatch: action => dispatch => 
             <h2 ref={useRef(null)} role="breakline" className="comments-title" key="comments-title">Комментарии</h2>,
             ...Object.entries(comments).map(([id, message]) => <div key={id} className="message js-message" data-id={message.id}>
                 {message?.date_break && <div className="message-break"><span>{message.date_break}</span></div>}
-                <Message message={message} onEdit={() => onEdit(message)} onDelete={() => onDelete([message.id, Context.id, Context.cnt_comments])}/>
+                <Message message={message} onEdit={() => {Renderer.scrollers?.article?._container.scrollTo(999999, 999999); onEdit(message)}} onDelete={() => onDelete([message.id, Context.id, Context.cnt_comments])}/>
             </div>),
             <div className="user-form" ref={useRef(null)} key="user-form"><UserForm instance="comments" aid={Context.id} count={Context.cnt_comments}/></div>
         ];

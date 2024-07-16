@@ -101,7 +101,7 @@ export default new class
 
     build(context)
     {
-        this.context = context; !this.cookies.values?.uid && this.cookies.set('uid', this.context.uid, 365); return () => this.destroy();
+        document.title = context.page_title + ' | Strong Elephant'; this.context = context; !this.cookies.values?.uid && this.cookies.set('uid', this.context.uid, 365); return () => this.destroy();
     }
 
     /////////////////
@@ -256,11 +256,18 @@ export default new class
         return !Object.entries(state.list).filter(values => !values.pop()).length ? this[state.action ?? 'after']() : false;
     }
 
-    rerender()
+    rerender(counters)
     {
-        if(this.context?.props?.action === 'columnize' && window.innerWidth >= 768)
+        if(window.innerWidth >= 768)
         {
-            this.comments.reload = true; if(!this.comments.on) return; this.comments.reload = false; document.body.classList.add('loading-after'); setTimeout(() => this.columnize(this.scrollLeft), 1);
+            if(this.context?.props?.action === 'columnize')
+            {
+                this.comments.reload = true; if(!this.comments.on) return; this.comments.reload = false; document.body.classList.add('loading-after'); setTimeout(() => this.columnize(this.scrollLeft), 1);
+            }
+            else
+            {
+                counters?.insert && setTimeout(() => this.scrollers?.article?._container.scrollTo(0, 999999), 1);
+            }
         }
 
         this.setChildrens([...this.first, ...this.childrens, ...this.last]);

@@ -39,7 +39,7 @@ export default ({children, articles}) =>
                         <ul>
                             <li className="pegi"></li>
                             <li className="vk"><a href="//vk.com/strong_elephant" target="_blank"></a></li>
-                            <li className="inst"><a href="//instagram.com/exp.achtung/" target="_blank"></a></li>
+                            <li className="tg"><a href="//t.me/Devexp" target="_blank"></a></li>
                             <li className="yt"><a href="//www.youtube.com/channel/UCgmByMVXw18Ahjr1wwSOKPw" target="_blank"></a></li>
                         </ul>
                     </div>

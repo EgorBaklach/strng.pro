@@ -5,6 +5,9 @@ storage
 vendor
 config
 fonts
+dist
+fonts.css
+highlight.css
 favicon
 images
 logs

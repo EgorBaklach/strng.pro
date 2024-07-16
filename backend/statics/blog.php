@@ -2,8 +2,8 @@
     'status' => 200,
     'page' => 'common',
     'reason_phrase' => 'Ok',
-    'page_title' => 'Блог | Strong Elephant',
-    'og_title' => 'Блог | Strong Elephant',
+    'page_title' => 'Блог',
+    'og_title' => 'Блог | strng.pro - Strong Elephant',
     'og_description' => 'Статьи о программировании, фотографии, музыке, дизайне от разработчика с большим стажем.',
     'description' => 'Уникальный контент о программировании, фотографии, музыке, дизайне от разработчика с большим стажем. Здесь вы всегда найдете полезный для себя материал.',
     'keywords' => 'Strong Elephant, программирование на php, про фотографию, про музыку'

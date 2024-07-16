@@ -4,7 +4,7 @@ import {createServer} from 'vite'
 import { Server } from "socket.io";
 import http from "http";
 
-const app = express(), server = http.createServer(app), io = new Server(server);
+const isProduction = process.env.NODE_ENV === 'production', app = express(), server = http.createServer(app), io = new Server(server); let vite;
 
 const createFetchRequest = (request, response) =>
 {
@@ -22,36 +22,36 @@ const createFetchRequest = (request, response) =>
 
 io.on("connection", socket => socket.on('call', props => io.emit('answer', props)));
 
-const vite = await createServer({
-    server: {
-        middlewareMode: true,
-        hmr: false,
-        https: {
-            key: fs.readFileSync('/etc/letsencrypt/live/dev.arg.me/privkey.pem'),
-            cert: fs.readFileSync('/etc/letsencrypt/live/dev.arg.me/fullchain.pem'),
-        }
-    },
-    appType: 'custom'
-});
+if(!isProduction)
+{
+    vite = await createServer({
+        server: {
+            middlewareMode: true,
+            hmr: false,
+            https: {
+                key: fs.readFileSync('/etc/letsencrypt/live/dev.arg.me/privkey.pem'),
+                cert: fs.readFileSync('/etc/letsencrypt/live/dev.arg.me/fullchain.pem'),
+            }
+        },
+        appType: 'custom'
+    });
 
-app.use(vite.middlewares);
+    app.use(vite.middlewares);
+}
 
 app.use('*', async (request, response) =>
 {
     try
     {
-        const render = await vite.ssrLoadModule('./src/server.jsx').then(module => module.render(createFetchRequest(request, response)));
+        const render = await (!isProduction ? vite.ssrLoadModule('./src/server.jsx') : import('./src/server.js')).then(module => module.render(createFetchRequest(request, response)));
 
-        const html = await vite.transformIndexHtml(request.originalUrl.replace('/', ''), fs.readFileSync('index.html', 'utf-8')).then(template => template
-            .replace(`<!--app-head-->`, render.head ?? '')
-            .replace(`<!--app-html-->`, render.html ?? '')
-        );
+        const html = await (!isProduction ? vite.transformIndexHtml(request.originalUrl.replace('/', ''), fs.readFileSync('index.html', 'utf-8')) : fs.readFileSync('index.html', 'utf-8'));
 
-        response.status(render.statusCode ?? 200).set({'Content-Type': 'text/html'}).end(html);
+        response.status(render.statusCode ?? 200).set({'Content-Type': 'text/html'}).end(html.replace(/<!--([a-zA-Z]+)-->/gi, (match, p1) => render[p1]));
     }
     catch (e)
     {
-        vite?.ssrFixStacktrace(e); response.status(500).end(e.stack);
+        !isProduction && vite.ssrFixStacktrace(e); response.status(500).end(e.stack);
     }
 })
 

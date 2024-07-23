@@ -48,7 +48,7 @@ class Post extends ControllerAbstract
 
                 $this->strng->table('users')->insert(compact('uid', 'name'))->onDuplicate(['name' => 'values(name)'] + (!$id ? ['counter' => 'counter + 1'] : []))->exec();
 
-                $table->insert(compact('uid', 'id', 'date', 'text'))->onDuplicate(['text' => 'values(text)'])->exec();
+                $table->insert(compact('uid', 'id', 'date', 'name', 'text'))->onDuplicate(['name' => 'values(name)', 'text' => 'values(text)'])->exec();
 
                 $result += ['id' => $id ?? $table->connection()->lastInsertId()] + compact('date', 'name', 'text', 'day', 'time');
 

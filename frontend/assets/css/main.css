@@ -1100,8 +1100,12 @@ button.arrow.right{
                 .article-item .detail a{
                     display: block;
                     padding: .3vw .35vw;
-                    border: 1px solid;
-                    border-radius: .3vw;
+                    background-color: #4B4F52;
+                    border-radius: 3px;
+                    color: white;
+                }
+                .article-item .detail a:hover{
+
                 }
 
 /* CHAT */
@@ -1416,6 +1420,74 @@ button.arrow.right{
                 border: none;
             }
 
+/* COOKIES PANEL */
+
+.cookies-panel{
+    user-select: none;
+    background-color: #323639;
+    transform: translateX(-50%);
+    position: fixed;
+    top: -5vw;
+    left: 50%;
+    z-index: 3;
+    border-radius: 10px;
+    overflow: hidden;
+
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: row;
+    -ms-flex-direction: row;
+    flex-direction: row;
+
+    -webkit-flex-wrap: nowrap;
+    -ms-flex-wrap: nowrap;
+    flex-wrap: nowrap;
+
+    -webkit-align-items: stretch;
+    -ms-flex-align: stretch;
+    align-items: stretch;
+
+    -webkit-justify-content: flex-start;
+    -ms-flex-pack: start;
+    justify-content: flex-start;
+}
+[cookies-panel-show] .cookies-panel{
+    transition: top 250ms ease-out;
+    top: 3vw;
+}
+.cookies-panel-hide .cookies-panel{
+    display: none;
+}
+    .cookies-panel > *{
+        font-family: "Open Sans", Tahoma, Arial, serif;
+        font-weight: 100;
+        font-size: .75vw;
+        line-height: 2.5vw;
+        padding: 0 1vw;
+    }
+    .cookies-panel .notice{
+        background: rgba(0, 0, 0, .25);
+    }
+        .cookies-panel .notice span{
+            color: #8F9396;
+            cursor: pointer;
+        }
+        .cookies-panel .notice span:hover{
+            color: white;
+        }
+    .cookies-panel button{
+        background: #4B4F52;
+        cursor: pointer;
+        border: none;
+        color: white;
+        text-align: center;
+    }
+
 @media screen and (max-width: 1025px)
 {
     header .menu > ul > li{
@@ -1581,7 +1653,7 @@ button.arrow.right{
                 .box .social li,
                 .box .social a{
                     padding: 3vw 5vw;
-                    border-radius: 5px;
+                    border-radius: 3px;
                 }
                 .box .social li a{
                     padding: 3vw 5vw;
@@ -1695,7 +1767,7 @@ button.arrow.right{
         width: inherit;
         height: 25vh;
         margin: 0 0 2.5vh 0;
-        box-shadow: 0 2px 7px rgba(0, 0, 0, .3);;
+        box-shadow: 0 2px 7px rgba(0, 0, 0, .3);
     }
         .article-item .picture .social{
             display: block;
@@ -1714,7 +1786,6 @@ button.arrow.right{
             margin-right: 2.5vw;
         }
             .article-item .detail a{
-                border-radius: 1.5vw;
                 padding: 1.5vw 1.75vw;
             }
 
@@ -1869,4 +1940,27 @@ button.arrow.right{
     .chat .user-form .textarea{
         min-height: 10vh;
     }
+
+    /* COOKIES PANEL */
+
+    .cookies-panel{
+        transform: none;
+        top: auto;
+        left: 10vw;
+        right: 10vw;
+        bottom: -20vw;
+    }
+    [cookies-panel-show] .cookies-panel{
+        transition: bottom 250ms ease-out;
+        bottom: 10vw;
+        top: auto;
+    }
+        .cookies-panel > *{
+            line-height: inherit;
+            font-size: 3.5vw;
+            padding: 4vw 4.5vw;
+        }
+        .cookies-panel .notice{
+            flex-grow: 1;
+        }
 }

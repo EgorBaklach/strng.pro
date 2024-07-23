@@ -11,9 +11,9 @@ export default createSlice({
         {
             state.user = payload ?? {}; state.loaded = true;
         },
-        counter: (state, {payload}) =>
+        update: (state, {payload: [name, counter]}) =>
         {
-            state.user.counter += payload;
+            if(name) state.user.name = name; state.user.counter += counter;
         }
     },
 });

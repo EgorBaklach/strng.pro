@@ -144,6 +144,8 @@ export default new class
     {
         this.dispatch = dispatch; this.api = {request, remove}; this.stream = {subscribe, clear}; document.querySelector("root").removeAttribute('data-ssr');
 
+        !this.cookies.values?.access && setTimeout(() => document.body.setAttribute('cookies-panel-show', ''), 250);
+
         document.fonts.onloadingdone = e => e.fontfaces.map(font => dispatch(Loader.actions.load(font.family.replace(/"/g, ''))) && dispatch(Loader.actions.check()));
 
         $(document).on('click', '.js-gallery-image', e => dispatch(Imager.actions.open(e.currentTarget.getAttribute('data-index'))) && false);
@@ -290,9 +292,18 @@ export default new class
 
         switch (operation)
         {
-            case 'insert': value = 1; this.dispatch(actions[instance].insert(['id:' + id, {me, id, aid, ...props}])) && me && this.dispatch(User.actions.counter(1)) && this.api.remove('dialog.message'); break;
-            case 'edit': this.dispatch(actions[instance].edit(['id:' + id, {aid, ...props}])) && me && this.dispatch(Editor.actions.clear([instance, id * 1])) && this.api.remove('dialog.message'); break;
-            case 'delete': value = -1; this.dispatch(actions[instance].delete(['id:' + id, aid])) && me && this.dispatch(User.actions.counter(-1)) && this.dispatch(Editor.actions.clear([instance, id * 1])) && this.api.remove('dialog.delete'); break;
+            case 'insert':
+                this.dispatch(actions[instance].insert(['id:' + id, {me, id, aid, ...props}])); value = 1;
+                me && this.dispatch(User.actions.update([props.name, 1])) && this.api.remove('dialog.message');
+                break;
+            case 'edit':
+                this.dispatch(actions[instance].edit(['id:' + id, {aid, ...props}]));
+                me && this.dispatch(User.actions.update([props.name, 0])) && this.dispatch(Editor.actions.clear([instance, id * 1])) && this.api.remove('dialog.message');
+                break;
+            case 'delete':
+                this.dispatch(actions[instance].delete(['id:' + id, aid])); value = -1;
+                me && this.dispatch(User.actions.update([null, -1])) && this.dispatch(Editor.actions.clear([instance, id * 1])) && this.api.remove('dialog.delete');
+                break;
         }
 
         if(instance === 'comments' && value !== null) this.social('comments', uid, aid, count, value); this.onScroll.call();

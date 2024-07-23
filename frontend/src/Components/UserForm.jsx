@@ -5,6 +5,7 @@ import {connect} from "react-redux";
 import Renderer from "../Plugins/Renderer.jsx";
 
 import Editor from "../Reducers/Editor.jsx";
+import User from "../Reducers/User.jsx";
 
 import Api from "../Actions/Api.jsx";
 
@@ -14,7 +15,7 @@ export default connect(States => ({...States.User, ...States.Editor}), {dispatch
 
     useEffect(() =>
     {
-        loaded && setData([edit[instance]?.name ?? user.name ?? name, edit[instance]?.text ?? text, edit[instance]?.id ? 'Редактировать сообщение' : '']);
+        loaded && setData([edit[instance]?.name || user.name || name, edit[instance]?.text || '', edit[instance]?.id ? 'Редактировать сообщение' : '']);
 
         edit[instance]?.id && ref.current.querySelector('.textarea').focus()
 
@@ -37,7 +38,8 @@ export default connect(States => ({...States.User, ...States.Editor}), {dispatch
             case n.length > 30: return setData([n, t, 'Имя > 30 символов']);
             case (/[^a-zA-Z\u0430-\u044f\s]+/gi).test(n): return setData([n, t, 'Имя содержит только буквы']);
             case t.length > 1000: return setData([n, t, 'Текст > 1000 символов']);
-            case edit[instance]?.name === name && edit[instance]?.text === text: return dispatch(Editor.actions.clear([instance, edit[instance]?.id])) && setData([n, '', '']);
+            case edit[instance]?.name === name && edit[instance]?.text === text:
+                return dispatch(User.actions.update([name, 0])) && dispatch(Editor.actions.clear([instance, edit[instance]?.id]))
         }
 
         request('dialog.message', 'POST', '/' + instance + '/message/index.json', JSON.stringify([n, t, edit[instance]?.id, aid])).then(r =>

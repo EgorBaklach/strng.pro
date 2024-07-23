@@ -12,12 +12,14 @@ import Gallery from "./Pages/Gallery.jsx";
 import Album from "./Pages/Album.jsx";
 import Tag from "./Pages/Tag.jsx";
 
+import CAPanel from "./Components/CAPanel.jsx";
 import Chat from "./Components/Chat.jsx";
 import Stub from "./Components/Stub.jsx";
 
+import Comments from "./Reducers/Comments.jsx";
+
 import Stream from "./Actions/Stream.jsx";
 import Api from "./Actions/Api.jsx";
-import Comments from "./Reducers/Comments.jsx";
 
 const _jsx = (type, props, key) => jsx(type, {...props, ref: ['symbol', 'function'].includes(typeof type) ? null : useRef(null)}, key);
 
@@ -65,7 +67,9 @@ export default [
         shouldRevalidate: (url) => url.currentUrl.pathname !== url.nextUrl.pathname,
         Component: connect(null, {dispatch: action => dispatch => dispatch(action), ...Api, ...Stream})(props =>
         {
-            useEffect(() => Renderer.start(props), []); return <Fragment><Outlet context={useLoaderData()}/>{!import.meta.env.SSR && <section className="chat"><Chat/></section>}</Fragment>
+            useEffect(() => Renderer.start(props), []);
+
+            return <Fragment><Outlet context={useLoaderData()}/>{!import.meta.env.SSR && <Fragment><section className="chat"><Chat/></section><CAPanel cookies={Renderer.cookies}/></Fragment>}</Fragment>
         }),
         children: [
             {index: true, Component: Handler(() => Index)},

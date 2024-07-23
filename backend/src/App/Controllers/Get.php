@@ -31,7 +31,7 @@ class Get extends ControllerAbstract
                 '0:id as id',
                 '0:uid as uid',
                 '0:date as date',
-                '1:name as name',
+                '0:name as name',
                 '1:role as role',
                 '0:text as text'
             ])->exec();

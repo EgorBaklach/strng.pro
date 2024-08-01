@@ -231,9 +231,7 @@ export default new class
 
         this.setChildrens([this.pages > 0 && this.lb, this.pages > 0 && this.rb, ...list.map((children, index) => jsx('div', {children, className: 'column', page: index + 1 + ' стр.'}))].filter(v => v));
 
-        document.body.classList.add('columnizer-active'); document.body.classList.remove('loading-after'); this.lb.ref.current?.classList.remove('active'); this.rb.ref.current?.classList.add('active');
-
-        this.width = Math.max(0, Math.floor(this.vw * (58.5 * this.pages-- - 20)));
+        this.width = Math.max(0, Math.floor(this.vw * (58.5 * this.pages-- - 20))); document.body.classList.add('columnizer-active'); setTimeout(() => document.body.classList.remove('loading-after'), 150);
 
         if(this.scrollers?.article)
         {

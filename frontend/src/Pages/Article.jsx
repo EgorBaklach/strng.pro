@@ -33,16 +33,12 @@ const Sticker = connect(state => state.Mobiler, null, null, {forwardRef: true})(
     return <Fragment>{createElement(mobile ? 'div' : 'a', !mobile ? {className: 'js-gallery-image', 'data-index': index, href: src, ref} : null, img)}<br/>{title}</Fragment>;
 }))
 
-const Smallsup = ({color, children}) => <span style={{color}} className="small-sup">{children}</span>;
-
 const code = ({className, ...props}) =>
 {
     const match = /language-(\w+)/.exec(className || '');
 
-    return match ? <SyntaxHighlighter language={match[1]} useInlineStyles={false} PreTag="div" {...props} ref={useRef(null)}/> : <code className={className} {...props} ref={useRef(null)}/>
+    return !import.meta.env.SSR && match ? <SyntaxHighlighter language={match[1]} useInlineStyles={false} PreTag="div" {...props}/> : <code className={className} {...props}/>
 }
-
-const Video = (props) => <YouTube {...props} ref={useRef(null)}/>
 
 const GridGalleryItem = connect(state => state.Mobiler)(({src, title, index, dispatch}) =>
 {
@@ -121,14 +117,18 @@ export default connect(state => state.Mobiler, {dispatch: action => dispatch => 
     Renderer.lb = <button ref={useRef(null)} className="arrow left" onClick={() => Renderer.turn(false)}></button>;
     Renderer.rb = <button ref={useRef(null)} className="arrow right active" onClick={() => Renderer.turn(true)}></button>;
 
-    const GridGallery = props => <GridGalleryComponent pictures={Context.pictures} title={Context.name} {...props}/>;
-
     return <Layout articles={Context.articles}>
         <Wrapper component="main" reverse={Main} role="article" className="wrapper">
             <div className={"container" + (Context.props?.action === 'columnize' ? " horizontal" : "")}>
                 <div className="chat-icon" onClick={() => document.body.classList.toggle('chat-active')}></div>
                 {import.meta.env.SSR ? Renderer.first.map(v => v) : null}
-                <Content components={{code, Video, Sticker, Smallsup, GridGallery}}/>
+                <Content components={{
+                    code,
+                    Sticker,
+                    Video: props => !import.meta.env.SSR && <YouTube {...props}/>,
+                    Smallsup: ({color, children}) => <span style={{color}} className="small-sup">{children}</span>,
+                    GridGallery: props => <GridGalleryComponent pictures={Context.pictures} title={Context.name} {...props}/>
+                }}/>
                 {import.meta.env.SSR ? Renderer.last.map(v => v) : null}
             </div>
         </Wrapper>

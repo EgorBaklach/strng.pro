@@ -59,25 +59,22 @@ const ArticleComponent = connect(state => state.Comments)(memo(({Context, aid, c
     return (Context.id === aid || import.meta.env.SSR) && <Article Context={Context} comments={comments} counters={counters}/>;
 }));
 
-export default [
+export default [{
+    path: "/",
+    loader: ({request: {url, headers}}) => (url => fetch('https://dev.arg.me' + url.pathname + 'index.json' + url.search, init(headers)).then(r => r.json().then(j => render({...j, url: 'https://dev.arg.me' + url.pathname}))).catch(() => catcher('https://dev.arg.me' + url.pathname)))(new URL(url)),
+    shouldRevalidate: (url) => url.currentUrl.pathname !== url.nextUrl.pathname,
+    Component: connect(null, {dispatch: action => dispatch => dispatch(action), ...Api, ...Stream})(props =>
     {
-        path: "/",
-        loader: ({request: {url, headers}}) => fetch((url => url.origin + url.pathname + 'index.json' + url.search)(new URL(url)), init(headers))
-            .then(resolve => resolve.json().then(json => render({...json, url}))).catch(() => catcher(url)),
-        shouldRevalidate: (url) => url.currentUrl.pathname !== url.nextUrl.pathname,
-        Component: connect(null, {dispatch: action => dispatch => dispatch(action), ...Api, ...Stream})(props =>
-        {
-            useEffect(() => Renderer.start(props), []);
+        useEffect(() => Renderer.start(props), []);
 
-            return <Fragment><Outlet context={useLoaderData()}/>{!import.meta.env.SSR && <Fragment><section className="chat"><Chat/></section><CAPanel cookies={Renderer.cookies}/></Fragment>}</Fragment>
-        }),
-        children: [
-            {index: true, Component: Handler(() => Index)},
-            {path: 'blog/', Component: Handler(() => Blog)},
-            {path: 'blog/:slug', Component: Handler(Context => Context.props?.is_gallery ? Album : ArticleComponent)},
-            {path: 'tag/:slug', Component: Handler(() => Tag)},
-            {path: 'gallery/', Component: Handler(() => Gallery)},
-            {path: '*', Component: Handler(() => StubComponent)}
-        ]
-    }
-]
+        return <Fragment><Outlet context={useLoaderData()}/>{!import.meta.env.SSR && <Fragment><section className="chat"><Chat/></section><CAPanel cookies={Renderer.cookies}/></Fragment>}</Fragment>
+    }),
+    children: [
+        {index: true, Component: Handler(() => Index)},
+        {path: 'blog/', Component: Handler(() => Blog)},
+        {path: 'blog/:slug', Component: Handler(Context => Context.props?.is_gallery ? Album : ArticleComponent)},
+        {path: 'tag/:slug', Component: Handler(() => Tag)},
+        {path: 'gallery/', Component: Handler(() => Gallery)},
+        {path: '*', Component: Handler(() => StubComponent)}
+    ]
+}]

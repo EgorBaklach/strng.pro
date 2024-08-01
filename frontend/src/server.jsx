@@ -10,12 +10,13 @@ export const render = async request =>
 
     return {
         html: ReactDOMServer.renderToString(<ReduxProvider><StaticRouterProvider router={router} context={context} hydrate={false} /></ReduxProvider>) ?? '',
+        url: context.loaderData[0]?.url,
         statusCode: context.loaderData[0]?.status,
         title: context.loaderData[0]?.page_title ?? '',
         ogTitle: context.loaderData[0]?.og_title ?? '',
         description: context.loaderData[0]?.description ?? '',
         ogDescription: context.loaderData[0]?.og_description ?? '',
         keywords: context.loaderData[0]?.keywords ?? '',
-        image: context.loaderData[0]?.image ?? 'https://dev.arg.me/assets/images/main.png'
+        image: context.loaderData[0]?.image ?? 'https://strng.pro/assets/images/main.png'
     };
 }
